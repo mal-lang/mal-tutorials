@@ -1,5 +1,5 @@
 # Tutorial 3 - How to use the MAL GUI
-The mal-gui is a graphical user interface tool used to create MAL instance models and scenarios (specifying attack agents). In this tutorial we will learn how to use it.
+The [mal-gui](https://github.com/mal-lang/mal-gui) is a graphical user interface tool used to create MAL instance models and scenarios (specifying attack agents). In this tutorial we will learn how to use it.
 
 ## Installation
 1. In your working directory, create a virtual environment and activate it.
