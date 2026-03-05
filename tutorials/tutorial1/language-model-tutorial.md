@@ -161,21 +161,20 @@ When we run `python tutorial1.py` we will just see "Simulation over after 0 step
 To do so, replace the previous code (2 lines) with:
 
 ```python
-    # Create agent settings
-    agent_settings: AgentSettings = {
-        "MyAttacker": AttackerSettings(
-            "MyAttacker",
-            entry_points={"ComputerA:access"},
-            goals={"FolderB:stealSecrets"},
-            policy=RandomAgent
-        )
-    }
-    simulator = MalSimulator(graph, agent_settings=agent_settings)
-    run_simulation(simulator, agent_settings)
+# Create agent settings
+agent_settings: AgentSettings = {
+    "MyAttacker": AttackerSettings(
+        "MyAttacker",
+        entry_points={"ComputerA:access"},
+        goals={"FolderB:stealSecrets"},
+        policy=RandomAgent
+    )
+}
+simulator = MalSimulator(graph, agent_settings=agent_settings)
+run_simulation(simulator, agent_settings)
 
-    import pprint
-    pprint.pprint(simulator.recording)
-
+import pprint
+pprint.pprint(simulator.recording)
 ```
 
 This registers an attacker in the simulator, gives a dict of agents to `run_simulation` which will use the policy set in the AttackerSettings object. We then print the recording of the simulation.
