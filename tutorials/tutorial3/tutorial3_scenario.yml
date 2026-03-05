@@ -1,0 +1,67 @@
+lang_file: /home/joakim-loxdal/Documents/mal-toolbox-tutorial/tutorials/tutorial3/actions_effects_lang.mal
+agents:
+  Attacker:
+    name: Attacker
+    type: attacker
+    entry_points: !!set
+      ComputerA:physicalAccess: null
+    goals: !!set
+      DataOnAppB:read: null
+    policy: RandomAgent
+model:
+  metadata:
+    name: actions_effects_model
+    langVersion: 0.0.0
+    langID: test-actions-effects
+    malVersion: 0.1.0-SNAPSHOT
+    MAL-Toolbox Version: 2.0.0
+    info: Created by the mal-toolbox model python module.
+  assets:
+    0:
+      name: ComputerA
+      type: Computer
+      associated_assets:
+        computerApps:
+          2: AppA
+      extras:
+        position:
+          x: -498.0
+          y: -247.0
+    2:
+      name: AppA
+      type: Application
+      associated_assets:
+        computerOfApp:
+          0: ComputerA
+        toApplications:
+          3: AppB
+        fromApplications:
+          3: AppB
+      extras:
+        position:
+          x: -495.0
+          y: -427.0
+    3:
+      name: AppB
+      type: Application
+      associated_assets:
+        fromApplications:
+          2: AppA
+        dataOnApp:
+          4: DataOnAppB
+        toApplications:
+          2: AppA
+      extras:
+        position:
+          x: -495.0
+          y: -618.0
+    4:
+      name: DataOnAppB
+      type: Data
+      associated_assets:
+        appWithData:
+          3: AppB
+      extras:
+        position:
+          x: 56.0
+          y: -616.0
