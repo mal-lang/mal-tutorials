@@ -106,7 +106,7 @@ def add_creds_to_user(model: Model, identity: ModelAsset, data_asset_name: str) 
 
 ```
 
-These helper functions are made to work with the MAL language TyrLang, association fieldnames and asset types are specific per language. Therefore, they would need to be adapted depending on the MAL language in use.
+These helper functions are made to work with the MAL language tyrLang, association fieldnames and asset types are specific per language. Therefore, they would need to be adapted depending on the MAL language in use.
 
 Each function creates assets in a model and connects the assets to other assets using associations (associatoin fieldnames to be more exact).
 
@@ -180,15 +180,11 @@ if __name__ == '__main__':
 
 For the next steps you need the tool **Graphviz**. If you do not have already installed it you might find more information about it in the following link: [How to download & install Graphviz](https://github.com/mal-lang/mal-toolbox?tab=readme-ov-file#requirements). 
 
-Once Graphviz is installed, uncomment the line with 'render_model' and run the file with `python tutorial2.py` to see a [render](my-model.gv.pdf) of the model. This can be helpful to debug generated models. 
+Once Graphviz is installed, uncomment the line with 'render_model' and run the file with `python tutorial2.py` to see a [render](my-model.gv.pdf) of the model. This can be helpful to debug generated models. We also have a specific tool for visualizing and creating MAL models covered in [this tutorial](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial3/mal-gui-tutorial.md).
 
-Then try it with the other line (render_graph) to see a [render](my-attack-graph.gv.pdf) of the attack graph. This will not be very helpful, but gives a feel of the size of the graph.
+Then try it with the other line (render_graph) to see a [render](my-attack-graph.gv.pdf) of the attack graph. The attack graph contains all the attack steps and their relations in the model according to the definition in the MAL language, tyrLang in our case. Conceptually this represents the full blueprint of all possible attacks steps and attack paths possible in the model. As seen from the render, we see that even small models in simple languages easily become difficult to overview. Therefore, we typically would like to apply some form of analysis mechanism on the attack graph. 
 
-The attack graph is a representation of the model that folds out all of the attack steps defined in the MAL language. This can be used to run analyzis or simulations.
-
-One option is to work with the attack graph as it is. This requires MAL knowledge about how the graph is structured, what the different types of attack steps mean, etc.
-
-Instead, in the next section we will use the `mal-simulator` to run simulations with different agents that can give us some knowledge of the attack graph (which in turn gives us knowledge of the imagined architecture).
+In the next section we will use the `mal-simulator` to run simulations with different agents. In these simulations the agents steps through the full attack graph and produces a (typically partial) graph traversal path, conceptually mimicking the activity of red team penetration tests in the modeled system environment. 
 
 ### Run Simulations
 
