@@ -1,5 +1,5 @@
-# MAL-toolbox-tutorial
-A tutorial on how to use mal-toolbox and associated tools.
+# MAL-tutorials
+A series of tutorials on how to use mal-toolbox and associated tools.
 Examples in this repository are written to work for mal-toolbox and mal-simulator 2.\*.\*.
 This repository contains tutorials and guides on how to do things with the toolbox and simulator, as well as other tools in the MAL ecosystem.
 
