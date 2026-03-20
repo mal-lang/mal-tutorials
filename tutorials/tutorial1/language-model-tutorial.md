@@ -22,44 +22,70 @@ pip install mal-simulator
 ```
 
 ### Definition of a MAL Language
-To define a MAL-Language or ***MAL-Lang***, create a file in the same directory called `my-language.mal` and copy the following code into it:
+To define a MAL-Language or ***MAL-Lang***, create a file in the same directory called `exampleLang.mal` and copy the following code into it:
 
 ```
-#id: "org.mal-lang.my-language"
-#version: "1.0.0"
+#id: "exampleLang"
+#version: "2.0.0"
 
 category System {
-    asset Computer {
+
+    asset Machine {
         | connect
-            -> access
-        | crackPassword [HardAndCertain]
-            -> access
-        & access
+            -> authCompromise
+
+        | authenticate
+            -> authCompromise
+
+        & authCompromise
             -> compromise
-	    | compromise
-            -> folder.accessFolder,
-               toComputer.connect,
-               toComputer.crackPassword
+
+        | compromise
+            -> storesCreds.access,
+               networks.communicate
     }
-    asset Folder {
-        | accessFolder
-            -> stealSecrets
-        | stealSecrets
+
+    asset Credentials {
+        | access
+            -> useUnencrypted,
+               crack
+
+        & useUnencrypted
+            -> use
+
+        | crack [HardAndCertain]
+            -> use
+
+        | use
+            -> authenticates.authenticate
+
+        # encrypted
+            -> useUnencrypted
+    }
+
+    asset Network {
+        | communicate
+            -> parties.connect
     }
 }
 
 associations {
-    Computer [fromComputer] * <-- ComputerConnection --> * [toComputer] Computer
-    Computer [computer] * <-- ComputerFolderConnection --> * [folder] Folder
+    Machine [parties] * <-- Communication --> * [networks] Network
+    Machine [storedOn] 0..1 <-- Storage --> * [storesCreds] Credentials
+    Machine [authenticates] 0..1 <-- Access --> * [authCreds] Credentials
 }
 ```
 
-This piece of code defines a simple example of MAL-Language. We define a category called System that holds two assets:
-- Computer
-    - If steps `connect` and `crackPassword` happen, then `access` would be triggered, which at the same time would trigger `compromise`.
-    - If `compromise` is activated, we would move to the step `accessFolder` in asset `Folder`.
-- Folder
-    - If `accessFolder` is given, it would trigger `stealSecrets`.
+This piece of code defines a simple example of MAL-Language. More specifically, it is [**exampleLang**`](https://github.com/mal-lang/exampleLang), a basic MAL language intended to demonstrate the standard structure and essential components of a MAL language. Here is an explanation of the language:
+
+We define a category called System that holds three assets:
+- Machine
+    - If steps `connect` and `authenticate` happen, then `authCompromise` would be triggered, which at the same time would trigger `compromise`, which would also trigger `access` in the `Credentials` asset and `communicate` in the `Network` asset.
+- Credentials
+    - If `access` is given, it would trigger `useUnencrypted` and `crack`.
+        - `useUnencrypted` would trigger `use`, which then would trigger `authenticate` in the `Machine` asset. This would mean that the attack has succedeed and the attacker has access to the machine.
+    - The `crack` step has a distribution function
+- Network
 
 In the `associations` section we define the relationship assets have. In this case, `Computer` and `Folder` have an N to M relationship, represented by the `*`.
 
