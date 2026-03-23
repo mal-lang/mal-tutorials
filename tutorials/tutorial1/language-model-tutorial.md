@@ -22,7 +22,7 @@ pip install mal-simulator
 ```
 
 ### Definition of a MAL Language
-To define a MAL-Language or ***MAL-Lang***, create a file in the same directory called `exampleLang.mal` and copy the following code into it:
+To define a ***MAL-Lang***, create a file in the same directory called `exampleLang.mal` and copy the following code into it:
 
 ```
 #id: "exampleLang"
@@ -76,7 +76,7 @@ associations {
 }
 ```
 
-This piece of code defines a simple example of MAL-Language. More specifically, it is [**exampleLang**`](https://github.com/mal-lang/exampleLang), a basic MAL language intended to demonstrate the standard structure and essential components of a MAL language. Here is an explanation of the language:
+This piece of code defines a simple example of MAL-Language. More specifically, it is [**exampleLang**](https://github.com/mal-lang/exampleLang), a basic MAL language intended to demonstrate the standard structure and essential components of a MAL language. Here is an explanation of the language:
 
 We define a category called System that holds three assets:
 - Machine
@@ -84,10 +84,16 @@ We define a category called System that holds three assets:
 - Credentials
     - If `access` is given, it would trigger `useUnencrypted` and `crack`.
         - `useUnencrypted` would trigger `use`, which then would trigger `authenticate` in the `Machine` asset. This would mean that the attack has succedeed and the attacker has access to the machine.
-    - The `crack` step has a distribution function
+    - The `crack` step has an ordinal distribution (HardAndCertain). This means that probability for this step to happen is hard and certain. HardAndCertain is defined by the distribution function Exponential(0.1). You can read more about this topic [here](https://github.com/mal-lang/malcompiler/wiki/Supported-distribution-functions).
+    - The `encrypted` step is a **defense step**. That is, if the defender activates it, `useEncrypted` will be blocked and, therefore, that path will be as well.
 - Network
+    - If the `communicate` step is activated, `connect` of the `Machine` asset will be given. This step allows jumping from machine to machine.
 
-In the `associations` section we define the relationship assets have. In this case, `Computer` and `Folder` have an N to M relationship, represented by the `*`.
+In the `associations` section we define the relationship assets have. In this case, we have three relationships:
+- `Machine` and `Network` have an N to M relationship, represented by the `*`.
+- `Machine` and `Credentials` have two relationships:
+    - In the sense of `Storage`, they have a 1 to N relationship. A machine can store many credentials (`storesCreds` and `*`) and credentials can only be stored in one machine (`storedOn` and `0..1`).
+    - In the sense of `Access`, they also have a 1 to N relationship. A machine can be authenticated with many credentials (`authCreds` and `*`) and credentials can only authenticate one machine (`authenticates` and `0..1`).
 
 Once we have the MAL-Lang file, we can create a python script to automate the creation of *Language Graphs* and *Models* based on this MAL-language. To get a deeper insight into the **MAL languages syntaxis**, [visit the MAL Documentation repository](https://github.com/mal-lang/mal-documentation/wiki/1.-MAL-Syntax)
 
