@@ -92,10 +92,10 @@ We define a category called System that holds three assets:
 In the `associations` section we define the relationship assets have. In this case, we have three relationships:
 - `Machine` and `Network` have an N to M relationship, represented by the `*`.
 - `Machine` and `Credentials` have two relationships:
-    - In the sense of `Storage`, they have a 1 to N relationship. A machine can store many credentials (`storesCreds` and `*`) and credentials can only be stored in one machine (`storedOn` and `0..1`).
-    - In the sense of `Access`, they also have a 1 to N relationship. A machine can be authenticated with many credentials (`authCreds` and `*`) and credentials can only authenticate one machine (`authenticates` and `0..1`).
+    - In the `Storage` sense, they have a 1 to N relationship. A machine can store many credentials (`storesCreds` and `*`) and credentials can only be stored in one machine (`storedOn` and `0..1`).
+    - In the `Access` sense, they also have a 1 to N relationship. A machine can be authenticated with many credentials (`authCreds` and `*`) and credentials can only authenticate one machine (`authenticates` and `0..1`).
 
-Once we have the MAL-Lang file, we can create a python script to automate the creation of *Language Graphs* and *Models* based on this MAL-language. Get deeper insight into **MAL languages syntax**, [visit the MAL specification repository](https://github.com/mal-lang/mal-specification/wiki/MAL-Syntax).
+Once we have the MAL-Lang file, we can create a python script to automate the creation of *Language Graphs* and *Models* based on this MAL-language. Get deeper insight into **MAL syntax**, [visit the MAL specification repository](https://github.com/mal-lang/mal-specification/wiki/MAL-Syntax).
 
 ### Creation of Models and Language Graphs
 Create a python file in the same directory called `tutorial1.py`.
@@ -103,36 +103,30 @@ Create a python file in the same directory called `tutorial1.py`.
 Copy this code into `tutorial1.py`:
 
 ```python
-import os
 from maltoolbox.model import Model
 from maltoolbox.language import LanguageGraph
 
-
 def create_model(lang_graph: LanguageGraph) -> Model:
-    """Create a model with 2 computers"""
+    """Create a model with two machines, one network and one set of credentials"""
     model = Model("my-model", lang_graph)
 
-    # Two computers
-    comp_a = model.add_asset("Computer", "ComputerA")
-    comp_b = model.add_asset("Computer", "ComputerB")
+    office_net = model.add_asset('Network', 'OfficeNet')
+    machine_1 = model.add_asset('Machine', 'Machine1')
+    machine_2 = model.add_asset('Machine', 'Machine2')
+    credentials_for_machine_2 = model.add_asset('Credentials', 'CredentialsForM2')
 
-    # Connection between computers
-    comp_a.add_associated_assets("toComputer", {comp_b})
-
-    # Two folders
-    folder1 = model.add_asset("Folder", "FolderA")
-    folder2 = model.add_asset("Folder", "FolderB")
-
-    # Connect the folders to the computers
-    comp_b.add_associated_assets("folder", {folder2})
-    comp_a.add_associated_assets("folder", {folder1})
+    office_net.add_associated_assets('parties', {machine_1, machine_2})
+    machine_1.add_associated_assets('storesCreds', {credentials_for_machine_2})
+    machine_2.add_associated_assets('authCreds', {credentials_for_machine_2})
 
     return model
 ```
+
 In this simple function, we create:
-- Two instances of our `Computer` asset (`ComputerA` and `ComputerB`) and our `Folder` asset (`FolderA` and `FolderB`).
-- A connection between `ComputerA` and `ComputerB`. The string `"computer2"` comes from the `ComputerConnection` association in the MAL language we created. 
-- Two connections between the computer and folder instances. The strings `"folder"` come from the `ComputerFolderConnection` association.
+- Two instances of our `Machine` asset (`Machine1` and `Machine2`), one instance of the `Network` asset (`OfficeNet`), and one of instance of the `Credentials` asset (`CredentialsForM2`).
+- A connection between `Machine1`, `Machine2` and `OfficeNet`. The string `"parties"` comes from the `Communication` association in the MAL language we created.
+- A connection between `Machine1` and `CredentialsForM2`. The string `"storesCreds"` comes from the `Storage` association. 
+- A connection between `Machine2` and `CredentialsForM2`. The string `"authCreds"` comes from the `Access` association. 
 
 Now we can instantiate the model. Add this to the end of the file:
 
