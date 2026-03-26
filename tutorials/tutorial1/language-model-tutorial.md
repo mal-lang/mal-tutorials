@@ -98,9 +98,9 @@ In the `associations` section we define the relationship assets have. In this ca
 Once we have the MAL-Lang file, we can create a python script to automate the creation of *Language Graphs* and *Models* based on this MAL-language. Get deeper insight into **MAL syntax**, [visit the MAL specification repository](https://github.com/mal-lang/mal-specification/wiki/MAL-Syntax).
 
 ### Creation of Models and Language Graphs
-Create a python file in the same directory called `tutorial1.py`.
+Create a python file in the same directory called `tutorial1-model.py`.
 
-Copy this code into `tutorial1.py`:
+Copy this code into `tutorial1-model.py`:
 
 ```python
 from maltoolbox.model import Model
@@ -128,41 +128,58 @@ In this simple function, we create:
 - A connection between `Machine1` and `CredentialsForM2`. The string `"storesCreds"` comes from the `Storage` association. 
 - A connection between `Machine2` and `CredentialsForM2`. The string `"authCreds"` comes from the `Access` association. 
 
-Now we can instantiate the model. Add this to the end of the file:
+To instantiate the model, we will create another file called `tutorial1_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial1_simulation.py` file:
 
 ```python
 def main():
-    lang_file = "my-language.mal"
+    lang_file = "/path/to/exampleLang.mal"
     current_dir = os.path.dirname(os.path.abspath(__file__))
     lang_file_path = os.path.join(current_dir, lang_file)
-    my_language = LanguageGraph.load_from_file(lang_file_path)
+    example_lang = LanguageGraph.load_from_file(lang_file_path)
 
     # Create our example model
-    model = create_model(my_language)
+    model = create_model(example_lang)
 
 
 if __name__ == "__main__":
     main()
 ```
-By executing this code, we create a model using a language graph, which in turn has been defined using our MAL-Lang "my-language.mal" (*my-language.mal* --> *LanguageGraph* --> *model*) . To do so, run the script with `python tutorial1.py`.
+
+And add these imports to the beginning of the file:
+
+```python
+import os
+from maltoolbox.language import LanguageGraph
+from tutorial1_model import create_model
+```
+
+By executing this code, we create a model using a language graph, which in turn has been defined using our MAL-Lang (*exampleLang.mal* --> *LanguageGraph* --> *Model*) . To do so, run the script with `python tutorial1-simulation.py`. The **expected result** from this should be a terminal with no errors. This is the Windows result, but the rest of OSs must be similar:
+```bash
+(.venv) C:\\mal-tutorials\tutorials\tutorial1>c:mal-tutorials\tutorials\tutorial1\.venv\Scripts\python.exe c:/mal-tutorials/tutorials/tutorial1tutorial1_simulation.py
+```
 
 ### Create an Attack Graph
-To create an attack graph, we use the model and the MAL-Lang. Add this import to the top of the file (below the other imports):
+To create an attack graph, we use the **model** and **exampleLang**. Add this import to the top of the `tutorial1-simulation.py` file:
 
 ```python
 from maltoolbox.attackgraph import AttackGraph
 ```
 
-Put this line after `model = create_model(tyr_lang)`:
+Put this line after `model = create_model(example_lang)`:
 
 ```python
 # Generate an attack graph from the model
-graph = AttackGraph(my_language, model)
+graph = AttackGraph(example_lang, model)
+```
+And add this import to the beginning of the file:
+
+```python
+from maltoolbox.attackgraph import AttackGraph
 ```
 
 The attack graph is a representation of the model that folds out all of the attack steps defined in the MAL language. This can be used to run analysis or simulations.
 
-If you would like to know more about the concepts ***LanguageGraph***, ***Model*** or ***AttackGraph***, [visit this Wiki](https://github.com/mal-lang/mal-toolbox/wiki/MAL-Toolbox-concepts)
+If you would like to know more about the concepts ***LanguageGraph***, ***Model*** or ***AttackGraph***, [visit this Wiki](https://github.com/mal-lang/mal-toolbox/wiki/MAL-Toolbox-concepts).
 
 ### Run simulation
 To run simulations, add these imports to the top of the file (below the other imports):
