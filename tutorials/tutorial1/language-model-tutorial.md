@@ -153,13 +153,15 @@ from maltoolbox.language import LanguageGraph
 from tutorial1_model import create_model
 ```
 
-By executing this code, we create a model using a language graph, which in turn has been defined using our MAL-Lang (*exampleLang.mal* --> *LanguageGraph* --> *Model*) . To do so, run the script with `python tutorial1-simulation.py`. The **expected result** from this should be a terminal with no errors. This is the Windows result, but the rest of OSs must be similar:
+By executing this code, we create a model using a language graph, which in turn has been defined using our MAL-Lang (*exampleLang.mal* --> *LanguageGraph* --> *Model*) . To do so, run the script with `python tutorial1_simulation.py`. The **expected result** from this should be a terminal with no errors. This is the Windows result, but the rest of OSs must be similar:
 ```bash
-(.venv) C:\\mal-tutorials\tutorials\tutorial1>c:mal-tutorials\tutorials\tutorial1\.venv\Scripts\python.exe c:/mal-tutorials/tutorials/tutorial1tutorial1_simulation.py
+(.venv) C:\\mal-tutorials\tutorials\tutorial1>c:mal-tutorials\tutorials\tutorial1\.venv\Scripts\python.exe c:/mal-tutorials/tutorials/tutorial1/tutorial1_simulation.py
 ```
 
+You can see the final version of `tutorial1_model.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_model.py).
+
 ### Create an Attack Graph
-To create an attack graph, we use the **model** and **exampleLang**. Add this import to the top of the `tutorial1-simulation.py` file:
+To create an attack graph, we use the **model** and **exampleLang**. Add this import to the top of the `tutorial1_simulation.py` file:
 
 ```python
 from maltoolbox.attackgraph import AttackGraph
@@ -177,12 +179,12 @@ And add this import to the beginning of the file:
 from maltoolbox.attackgraph import AttackGraph
 ```
 
-The attack graph is a representation of the model that folds out all of the attack steps defined in the MAL language. This can be used to run analysis or simulations.
+The attack graph is a representation of the model that folds out all of the attack steps defined in the MAL language, in this case, exampleLang. This can be used to run analysis or simulations. We will learn how to visualize models and attack graphs in [tutorial 2](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial2).
 
 If you would like to know more about the concepts ***LanguageGraph***, ***Model*** or ***AttackGraph***, [visit this Wiki](https://github.com/mal-lang/mal-toolbox/wiki/MAL-Toolbox-concepts).
 
 ### Run simulation
-To run simulations, add these imports to the top of the file (below the other imports):
+To run simulations, add these imports to the top of the `tutorial1_simulation.py` file:
 
 ```python
 from malsim import MalSimulator, run_simulation, AttackerSettings
@@ -190,7 +192,7 @@ from malsim.types import AgentSettings
 from malsim.policies import RandomAgent
 ```
 
-Now we can create a MalSimulator object from the attack graph `graph` and run simulations.
+Now we can create a `MalSimulator` object from the attack graph `graph` and run simulations.
 
 Add this to the end of the `main` function:
 
@@ -199,7 +201,7 @@ simulator = MalSimulator(graph)
 path = run_simulation(simulator, {})
 ```
 
-When we run `python tutorial1.py` we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
+When we run `python tutorial1_simulation.py` we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
 
 To do so, replace the previous code (2 lines) with:
 
@@ -221,3 +223,63 @@ pprint.pprint(simulator.recording)
 ```
 
 This registers an attacker in the simulator, gives a dict of agents to `run_simulation` which will use the policy set in the AttackerSettings object. We then print the recording of the simulation.
+
+You should see something like this in your terminal after running `python tutorial1_simulation.py`:
+```bash
+Iteration 0
+---
+Iteration 1
+---
+...
+Iteration 9
+---
+Simulation over after 10 steps.
+Total reward "Attacker1" 0.0
+defaultdict(<class 'dict'>,
+Total reward "Attacker1" 0.0
+defaultdict(<class 'dict'>,
+            {1: {'Attacker1': [AttackGraphNode(name: "OfficeNet:communicate", id: 0, type: or)]},
+             2: {'Attacker1': [AttackGraphNode(name: "Machine1:connect", id: 1, type: or)]},
+             3: {'Attacker1': [AttackGraphNode(name: "Machine2:connect", id: 5, type: or)]},
+             4: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:access", id: 9, type: or)]},
+             5: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:crack", id: 11, type: or)]},
+             6: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:use", id: 12, type: or)]},
+             7: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:useUnencrypted", id: 10, type: and)]},
+             8: {'Attacker1': [AttackGraphNode(name: "Machine2:authenticate", id: 6, type: or)]},
+             9: {'Attacker1': [AttackGraphNode(name: "Machine2:authCompromise", id: 7, type: and)]},
+             10: {'Attacker1': [AttackGraphNode(name: "Machine2:compromise", id: 8, type: or)]}})
+
+(.venv) C:\\mal-tutorials\tutorials\tutorial1>
+Total reward "Attacker1" 0.0
+defaultdict(<class 'dict'>,
+            {1: {'Attacker1': [AttackGraphNode(name: "OfficeNet:communicate", id: 0, type: or)]},
+             2: {'Attacker1': [AttackGraphNode(name: "Machine1:connect", id: 1, type: or)]},
+             3: {'Attacker1': [AttackGraphNode(name: "Machine2:connect", id: 5, type: or)]},
+             4: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:access", id: 9, type: or)]},
+             5: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:crack", id: 11, type: or)]},
+             6: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:use", id: 12, type: or)]},
+             7: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:useUnencrypted", id: 10, type: and)]},
+             8: {'Attacker1': [AttackGraphNode(name: "Machine2:authenticate", id: 6, type: or)]},
+             9: {'Attacker1': [AttackGraphNode(name: "Machine2:authCompromise", id: 7, type: and)]},
+             10: {'Attacker1': [AttackGraphNode(name: "Machine2:compromise", id: 8, type: or)]}})
+Total reward "Attacker1" 0.0
+defaultdict(<class 'dict'>,
+            {1: {'Attacker1': [AttackGraphNode(name: "OfficeNet:communicate", id: 0, type: or)]},
+             2: {'Attacker1': [AttackGraphNode(name: "Machine1:connect", id: 1, type: or)]},
+             3: {'Attacker1': [AttackGraphNode(name: "Machine2:connect", id: 5, type: or)]},
+             4: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:access", id: 9, type: or)]},
+Total reward "Attacker1" 0.0
+defaultdict(<class 'dict'>,
+            {1: {'Attacker1': [AttackGraphNode(name: "OfficeNet:communicate", id: 0, type: or)]},
+             2: {'Attacker1': [AttackGraphNode(name: "Machine1:connect", id: 1, type: or)]},
+             3: {'Attacker1': [AttackGraphNode(name: "Machine2:connect", id: 5, type: or)]},
+             4: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:access", id: 9, type: or)]},
+             5: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:crack", id: 11, type: or)]},
+             6: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:use", id: 12, type: or)]},
+             7: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:useUnencrypted", id: 10, type: and)]},
+             8: {'Attacker1': [AttackGraphNode(name: "Machine2:authenticate", id: 6, type: or)]},
+             9: {'Attacker1': [AttackGraphNode(name: "Machine2:authCompromise", id: 7, type: and)]},
+             10: {'Attacker1': [AttackGraphNode(name: "Machine2:compromise", id: 8, type: or)]}})
+```
+
+You can see the final version of `tutorial1_simulation.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_simulation.py).

@@ -1,4 +1,3 @@
-import os
 from maltoolbox.model import Model
 from maltoolbox.language import LanguageGraph
 
