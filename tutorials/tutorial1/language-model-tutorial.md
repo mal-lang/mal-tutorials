@@ -119,6 +119,8 @@ def create_model(lang_graph: LanguageGraph) -> Model:
     machine_1.add_associated_assets('storesCreds', {credentials_for_machine_2})
     machine_2.add_associated_assets('authCreds', {credentials_for_machine_2})
 
+    credentials_for_machine_2.defenses = {'encrypted': 1.0}
+
     return model
 ```
 
@@ -127,6 +129,7 @@ In this simple function, we create:
 - A connection between `Machine1`, `Machine2` and `OfficeNet`. The string `"parties"` comes from the `Communication` association in the MAL language we created.
 - A connection between `Machine1` and `CredentialsForM2`. The string `"storesCreds"` comes from the `Storage` association. 
 - A connection between `Machine2` and `CredentialsForM2`. The string `"authCreds"` comes from the `Access` association. 
+- The `credentials_for_machine_2.defenses = {'encrypted': 1.0}` activate the defense `encrypted` step in the `Credentials` asset. If you don't wish to activate the defense, you can comment this line.
 
 To instantiate the model, we will create another file called `tutorial1_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial1_simulation.py` file:
 
@@ -222,9 +225,15 @@ import pprint
 pprint.pprint(simulator.recording)
 ```
 
+In this section, we define the `AttackerSettings` object:
+- `MyAttacker`: the name we give to the attacker agent.
+- `entry_points`: the node where we make the attacker start.
+- `goals`: the node that we want the attacker to reach. This is an optional parameter. If you don't set one, the attacker will stop when it has reached all nodes or when it can't continue.
+- `policy`: tells the `run_simulation` function which policy (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
+
 This registers an attacker in the simulator, gives a dict of agents to `run_simulation` which will use the policy set in the AttackerSettings object. We then print the recording of the simulation.
 
-You should see something like this in your terminal after running `python tutorial1_simulation.py`:
+You should see something like the following code box in your terminal after running `python tutorial1_simulation.py`. You won't see an exact copy of the expected results because the attack path is not deterministic.
 ```bash
 Iteration 0
 ---
