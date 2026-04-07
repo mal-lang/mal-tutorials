@@ -129,7 +129,7 @@ In this simple function, we create:
 - A connection between `Machine1`, `Machine2` and `OfficeNet`. The string `"parties"` comes from the `Communication` association in the MAL language we created.
 - A connection between `Machine1` and `CredentialsForM2`. The string `"storesCreds"` comes from the `Storage` association. 
 - A connection between `Machine2` and `CredentialsForM2`. The string `"authCreds"` comes from the `Access` association. 
-- The `credentials_for_machine_2.defenses = {'encrypted': 1.0}` activate the defense `encrypted` step in the `Credentials` asset. If you don't wish to activate the defense, you can comment this line.
+- The `credentials_for_machine_2.defenses = {'encrypted': 1.0}` activate the defense `encrypted` step in the `Credentials` asset. The `1.0` means the defense step is activated. If you don't wish to activate the defense, you can comment this line.
 
 To instantiate the model, we will create another file called `tutorial1_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial1_simulation.py` file:
 
@@ -206,15 +206,15 @@ path = run_simulation(simulator, {})
 
 When we run `python tutorial1_simulation.py` we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
 
-To do so, replace the previous code (2 lines) with:
+To do so, replace the previous code with:
 
 ```python
 # Create agent settings
 agent_settings: AgentSettings = {
-    "MyAttacker": AttackerSettings(
-        "MyAttacker",
-        entry_points={"ComputerA:access"},
-        goals={"FolderB:stealSecrets"},
+    "Attacker1": AttackerSettings(
+        "Attacker1",
+        entry_points={"Machine1:compromise"},
+        goals={"Machine2:compromise"},
         policy=RandomAgent
     )
 }
@@ -227,13 +227,14 @@ pprint.pprint(simulator.recording)
 
 In this section, we define the `AttackerSettings` object:
 - `MyAttacker`: the name we give to the attacker agent.
-- `entry_points`: the node where we make the attacker start.
-- `goals`: the node that we want the attacker to reach. This is an optional parameter. If you don't set one, the attacker will stop when it has reached all nodes or when it can't continue.
+- `entry_points`: the node where we make the attacker start. An attacker can have more than one `entry_point`.
+- `goals`: the node or nodes that we want the attacker to reach. This is an optional parameter. The simulation is done when the goals are reached, or when all possible nodes are reached if no goal is set.
 - `policy`: tells the `run_simulation` function which policy (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
 
 This registers an attacker in the simulator, gives a dict of agents to `run_simulation` which will use the policy set in the AttackerSettings object. We then print the recording of the simulation.
 
-You should see something like the following code box in your terminal after running `python tutorial1_simulation.py`. You won't see an exact copy of the expected results because the attack path is not deterministic.
+You should see something like the following code box in your terminal after running `python tutorial1_simulation.py`. You won't see an exact copy of the expected results because the attack path, in this case, is not deterministic. Simulations can be deterministic if we gave a seed to the simulator.
+
 ```bash
 Iteration 0
 ---
@@ -290,5 +291,7 @@ defaultdict(<class 'dict'>,
              9: {'Attacker1': [AttackGraphNode(name: "Machine2:authCompromise", id: 7, type: and)]},
              10: {'Attacker1': [AttackGraphNode(name: "Machine2:compromise", id: 8, type: or)]}})
 ```
+
+Now, we will add a defender to the simulation.
 
 You can see the final version of `tutorial1_simulation.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_simulation.py).
