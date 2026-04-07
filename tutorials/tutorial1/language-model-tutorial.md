@@ -292,6 +292,6 @@ defaultdict(<class 'dict'>,
              10: {'Attacker1': [AttackGraphNode(name: "Machine2:compromise", id: 8, type: or)]}})
 ```
 
-Now, we will add a defender to the simulation.
+Now, we will add a defender to the simulation. To do so, we add it to the current `agent_settings`. 
 
 You can see the final version of `tutorial1_simulation.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_simulation.py).

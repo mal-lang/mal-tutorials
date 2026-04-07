@@ -2,7 +2,7 @@ import os
 from maltoolbox.language import LanguageGraph
 from maltoolbox.attackgraph import AttackGraph
 from tutorial1_model import create_model
-from malsim import MalSimulator, run_simulation, AttackerSettings
+from malsim import MalSimulator, run_simulation, AttackerSettings, DefenderSettings
 from malsim.types import AgentSettings
 from malsim.policies import RandomAgent
 
@@ -24,6 +24,10 @@ def main():
             "Attacker1",
             entry_points={"Machine1:compromise"},
             goals={"Machine2:compromise"},
+            policy=RandomAgent
+        ),
+        "Defender1": DefenderSettings(
+            "Defender1",
             policy=RandomAgent
         )
     }
