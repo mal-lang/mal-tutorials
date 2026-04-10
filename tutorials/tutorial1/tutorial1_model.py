@@ -14,6 +14,6 @@ def create_model(lang_graph: LanguageGraph) -> Model:
     machine_1.add_associated_assets('storesCreds', {credentials_for_machine_2})
     machine_2.add_associated_assets('authCreds', {credentials_for_machine_2})
 
-    #credentials_for_machine_2.defenses = {'encrypted': 1.0}
+    credentials_for_machine_2.defenses = {'encrypted': 1.0}
 
     return model
