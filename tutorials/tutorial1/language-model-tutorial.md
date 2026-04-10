@@ -22,7 +22,7 @@ pip install mal-simulator
 ```
 
 ### Definition of a MAL Language
-To define a ***MAL-Lang***, create a file in the same directory called `exampleLang.mal` and copy the following code into it:
+To define a ***mal-lang***, create a file in the same directory called `exampleLang.mal` and copy the following code into it:
 
 ```
 #id: "exampleLang"
@@ -206,6 +206,8 @@ path = run_simulation(simulator, {})
 
 When we run `python tutorial1_simulation.py` we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
 
+#### Add an attacker
+
 To do so, replace the previous code with:
 
 ```python
@@ -226,7 +228,7 @@ pprint.pprint(simulator.recording)
 ```
 
 In this section, we define the `AttackerSettings` object:
-- `MyAttacker`: the name we give to the attacker agent.
+- `Attacker1`: the name we give to the attacker agent.
 - `entry_points`: the node where we make the attacker start. An attacker can have more than one `entry_point`.
 - `goals`: the node or nodes that we want the attacker to reach. This is an optional parameter. The simulation is done when the goals are reached, or when all possible nodes are reached if no goal is set.
 - `policy`: tells the `run_simulation` function which policy (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
@@ -292,6 +294,63 @@ defaultdict(<class 'dict'>,
              10: {'Attacker1': [AttackGraphNode(name: "Machine2:compromise", id: 8, type: or)]}})
 ```
 
-Now, we will add a defender to the simulation. To do so, we add it to the current `agent_settings`. 
+#### Add a defender
+The first step will be to comment line 17 `# credentials_for_machine_2.defenses = {'encrypted': 1.0}` in the `tutorial1_model.py` file. We do this so that the defender can use this defense step. If it is already activated, the defender won't be able to activate it during the simulation.
+
+Now, we add a defender to the current `agent_settings`:
+```python
+agent_settings: AgentSettings = {
+    "Attacker1": AttackerSettings(
+        "Attacker1",
+        entry_points={"Machine1:compromise"},
+        goals={"Machine2:compromise"},
+        policy=RandomAgent
+    ),
+    "Defender1": DefenderSettings(
+        "Defender1",
+        policy=RandomAgent
+    )
+}
+```
+In this section, we define the `DefenderSettings` object:
+- `Defender1`: the name we give to the defender agent.
+- `policy`: The same policies are shared between attackers and defenders (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
+
+Run the simulation again `python tutorial1_simulation.py` and you will see something similar to the codebox below. 
+
+```bash
+Iteration 0
+---
+Iteration 1
+---
+...
+Iteration 9
+---
+Total reward "Attacker1" 0.0
+Total reward "Defender1" 0.0
+defaultdict(<class 'dict'>,
+            {1: {'Attacker1': [AttackGraphNode(name: "OfficeNet:communicate", id: 0, type: or)],
+                 'Defender1': [AttackGraphNode(name: "CredentialsForM2:encrypted", id: 13, type: defense)]},
+             2: {'Attacker1': [AttackGraphNode(name: "Machine2:connect", id: 5, type: or)],
+                 'Defender1': []},
+             3: {'Attacker1': [AttackGraphNode(name: "Machine1:connect", id: 1, type: or)],
+                 'Defender1': []},
+             4: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:access", id: 9, type: or)],
+                 'Defender1': []},
+             5: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:crack", id: 11, type: or)],
+                 'Defender1': []},
+             6: {'Attacker1': [AttackGraphNode(name: "CredentialsForM2:use", id: 12, type: or)],
+                 'Defender1': []},
+             7: {'Attacker1': [AttackGraphNode(name: "Machine2:authenticate", id: 6, type: or)],
+                 'Defender1': []},
+             8: {'Attacker1': [AttackGraphNode(name: "Machine2:authCompromise", id: 7, type: and)],
+                 'Defender1': []},
+             9: {'Attacker1': [AttackGraphNode(name: "Machine2:compromise", id: 8, type: or)],
+                 'Defender1': []}})
+```
+
+As we can see, the defender uses the `encrypted` defense step, but the attacker still reaches its goal.
 
 You can see the final version of `tutorial1_simulation.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_simulation.py).
+
+This tutorial has shown how to build a mal-lang, a model, an language graph, an attack graph and run a simulation. [Tutorial 2](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial2) will cover model-building from a given mal-lang, visualize an attack graph and give further insights on simulations.
