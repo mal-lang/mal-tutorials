@@ -7,7 +7,7 @@ Create a directory for the tutorial:
 
 `mkdir mal-tutorial2 && cd mal-tutorial2`
 
-Download tyrLang from github and put tyrLang in the directory:
+We will use **tyrLang** as the mal-lang. Download it from github and put tyrLang in the directory:
 
 `git clone https://github.com/mal-lang/tyrLang.git`
 
@@ -28,11 +28,20 @@ pip install mal-toolbox
 pip install mal-simulator
 ```
 
+### mal-lang: tyrLang
+[tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), .... tyrLang is a simpler version of coreLang. For this tutorial, we will use certain parts of tyrLang.
+
+- `Network`, `InternetworkConnectionRule` and `ConnectionRule` assets, and `interNetConnections`, `appConnections` and `netConnections` association: can be found in tyrLang's `src/main/mal/Networking.mal` file.
+- `Application` asset in `src/main/mal/DataResources.mal` file.
+- `SoftwareVulnerability` asset, and `application` association in `src/main/mal/Vulnerability.mal` file.
+- `Data` asset, and `containingApp` association in `src/main/mal/DataResources.mal` file.
+- `Identity` and `Credentials` assets, and `execPrivApps` and `identities` associations in `src/main/mal/IAM.mal` file.
+
 ### Helper Functions
 
-Create a python file in the directory called `tutorial2.py` with the text editor of choice.
+Create a python file in the directory called `tutorial2_model.py` with the text editor of choice.
 
-Copy this piece of code into `tutorial2.py`:
+Copy this piece of code into `tutorial2_model.py`:
 
 ```python
 
@@ -105,7 +114,7 @@ def add_creds_to_user(model: Model, identity: ModelAsset, data_asset_name: str) 
 
 ```
 
-These helper functions are made to work with the MAL language tyrLang, association fieldnames and asset types are specific per language. Therefore, they would need to be adapted depending on the MAL language in use.
+These helper functions are made to simplify the creation of the model. If you have followed the tutorials in order, you will see that the functions inside the helper functions (`add_asset`, `add_associated_assets`) were used in [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1). 
 
 Each function creates assets in a model and connects the assets to other assets using associations (associatoin fieldnames to be more exact).
 
