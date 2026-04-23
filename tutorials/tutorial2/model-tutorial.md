@@ -1,5 +1,5 @@
 # Tutorial 2 - Create model and run simulations
-In this tutorial, we will learn how to load a pre-existing language, create a model and run simulations on the generated attack graph.
+In this tutorial, we will learn how to load a pre-existing language, create a model and run simulations on the generated attack graph. It is recommended to follow [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1) before this one.
 
 ## Step by step
 ### Environment set-up
@@ -7,7 +7,7 @@ Create a directory for the tutorial:
 
 `mkdir mal-tutorial2 && cd mal-tutorial2`
 
-We will use **tyrLang** as the mal-lang. Download it from github and put tyrLang in the directory:
+We will use **tyrLang** as the mal-lang. Download it from Github and put tyrLang in the working directory:
 
 `git clone https://github.com/mal-lang/tyrLang.git`
 
@@ -29,7 +29,7 @@ pip install mal-simulator
 ```
 
 ### mal-lang: tyrLang
-[tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), .... tyrLang is a simpler version of coreLang. For this tutorial, we will use certain parts of tyrLang.
+[tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), .... . tyrLang is a simpler version of coreLang. For this tutorial, we will use certain parts of tyrLang.
 
 - `Network`, `InternetworkConnectionRule` and `ConnectionRule` assets, and `interNetConnections`, `appConnections` and `netConnections` association: can be found in tyrLang's `src/main/mal/Networking.mal` file.
 - `Application` asset in `src/main/mal/DataResources.mal` file.
@@ -39,12 +39,11 @@ pip install mal-simulator
 
 ### Helper Functions
 
-Create a python file in the directory called `tutorial2_model.py` with the text editor of choice.
+Create a python file in the directory called `tutorial2_utils.py` with the text editor of choice.
 
-Copy this piece of code into `tutorial2_model.py`:
+Copy this piece of code into `tutorial2_utils.py`:
 
 ```python
-
 import os
 
 from maltoolbox.language import LanguageGraph
@@ -54,7 +53,7 @@ from maltoolbox.visualization.graphviz_utils import render_model
 
 def connect_net_to_net(model: Model, net1: ModelAsset, net2: ModelAsset):
     """
-    Create a connection rule between net1 and net 2 and return it.
+    Create a connection rule (name of the asset) between net1 and net 2 and return it.
     """
     cr_asset_name = f"ConnectionRule {net1.name} {net2.name}"
     cr_asset = model.add_asset("InternetworkConnectionRule", cr_asset_name)
@@ -65,7 +64,7 @@ def connect_net_to_net(model: Model, net1: ModelAsset, net2: ModelAsset):
 
 def connect_app_to_net(model: Model, app: ModelAsset, net: ModelAsset) -> ModelAsset:
     """
-    Create a connection rule between app and net and return it.
+    Create a connection rule (name of the asset) between app and net and return it.
     """
     cr_asset_name = f"ConnectionRule {app.name} {net.name}"
     cr_asset = model.add_asset("ConnectionRule", cr_asset_name)
@@ -111,25 +110,20 @@ def add_creds_to_user(model: Model, identity: ModelAsset, data_asset_name: str) 
     creds_asset = model.add_asset("Credentials", data_asset_name)
     creds_asset.add_associated_assets("identities", {identity})
     return creds_asset
-
 ```
 
 These helper functions are made to simplify the creation of the model. If you have followed the tutorials in order, you will see that the functions inside the helper functions (`add_asset`, `add_associated_assets`) were used in [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1). 
 
-Each function creates assets in a model and connects the assets to other assets using associations (associatoin fieldnames to be more exact).
+Each function creates assets in a model and connects the assets to other assets using associations (association fieldnames to be more exact).
 
 ### Model Creation
 
-Let's create a model and use the helper functions. First, add these imports to the others at the beginning of the python file:
+Let's create a model and use the helper functions. First, create a file called `tutorial2_model.py` and add this:
 
 ```python
 from maltoolbox.attackgraph import AttackGraph
 from maltoolbox.visualization.graphviz_utils import render_model, render_attack_graph
-```
 
-Then, add this to the end of the file:
-
-```python
 def create_model(lang_graph: LanguageGraph) -> Model:
     """Create a model with 4 apps"""
     model = Model("my-model", lang_graph)
@@ -163,24 +157,29 @@ def create_model(lang_graph: LanguageGraph) -> Model:
     add_creds_to_user(model, user_on_app_3, "User3Creds")
 
     return model
+```
 
+In this simple function, we create:
+- Two instances of our `Machine` asset (`Machine1` and `Machine2`), one instance of the `Network` asset (`OfficeNet`), and one of instance of the `Credentials` asset (`CredentialsForM2`).
+- A connection between `Machine1`, `Machine2` and `OfficeNet`. The string `"parties"` comes from the `Communication` association in the MAL language we created.
+- A connection between `Machine1` and `CredentialsForM2`. The string `"storesCreds"` comes from the `Storage` association. 
+- A connection between `Machine2` and `CredentialsForM2`. The string `"authCreds"` comes from the `Access` association. 
+- The `credentials_for_machine_2.defenses = {'encrypted': 1.0}` activate the defense `encrypted` step in the `Credentials` asset. The `1.0` means the defense step is activated. If we didn't wish to activate the defense, we could comment this line.
 
+To instantiate the model, we will create another file called `tutorial1_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial1_simulation.py` file:
+
+```python
 def main():
-    lang_file = "tyrLang/src/main/mal/main.mal"
+    lang_file = "/path/to/exampleLang.mal"
     current_dir = os.path.dirname(os.path.abspath(__file__))
     lang_file_path = os.path.join(current_dir, lang_file)
-    tyr_lang = LanguageGraph.load_from_file(lang_file_path)
+    example_lang = LanguageGraph.load_from_file(lang_file_path)
 
     # Create our example model
-    model = create_model(tyr_lang)
+    model = create_model(example_lang)
 
-    # Generate an attack graph from the model
-    graph = AttackGraph(tyr_lang, model)
 
-    # render_model(model) # Uncomment to render graphviz pdf
-    # render_attack_graph(graph) # Uncomment to render graphviz pdf
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 ```
 
