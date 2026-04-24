@@ -176,11 +176,6 @@ Put this line after `model = create_model(example_lang)`:
 # Generate an attack graph from the model
 graph = AttackGraph(example_lang, model)
 ```
-And add this import to the beginning of the file:
-
-```python
-from maltoolbox.attackgraph import AttackGraph
-```
 
 The attack graph is a representation of the model that folds out all of the attack steps defined in the MAL language, in this case, exampleLang. This can be used to run analysis or simulations. We will learn how to visualize models and attack graphs in [tutorial 2](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial2).
 
