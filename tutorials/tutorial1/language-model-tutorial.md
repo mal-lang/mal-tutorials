@@ -98,9 +98,9 @@ In the `associations` section we define the relationship assets have. In this ca
 Once we have the MAL-Lang file, we can create a python script to automate the creation of *Language Graphs* and *Models* based on this MAL-language. Get deeper insight into **MAL syntax**, [visit the MAL specification repository](https://github.com/mal-lang/mal-specification/wiki/MAL-Syntax).
 
 ### Creation of Models and Language Graphs
-Create a python file in the same directory called `tutorial1-model.py`.
+Create a python file in the same directory called `tutorial1_model.py`.
 
-Copy this code into `tutorial1-model.py`:
+Copy this code into `tutorial1_model.py`:
 
 ```python
 from maltoolbox.model import Model
