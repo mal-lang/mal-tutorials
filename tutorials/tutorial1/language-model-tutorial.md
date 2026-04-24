@@ -129,7 +129,7 @@ In this simple function, we create:
 - A connection between `Machine1`, `Machine2` and `OfficeNet`. The string `"parties"` comes from the `Communication` association in the MAL language we created.
 - A connection between `Machine1` and `CredentialsForM2`. The string `"storesCreds"` comes from the `Storage` association. 
 - A connection between `Machine2` and `CredentialsForM2`. The string `"authCreds"` comes from the `Access` association. 
-- The `credentials_for_machine_2.defenses = {'encrypted': 1.0}` activate the defense `encrypted` step in the `Credentials` asset. The `1.0` means the defense step is activated. If you don't wish to activate the defense, you can comment this line.
+- The `credentials_for_machine_2.defenses = {'encrypted': 1.0}` activate the defense `encrypted` step in the `Credentials` asset. The `1.0` means the defense step is activated. If you don't wish to activate the defense, you can comment this line. Beware that if you activate the defense in the model (by NOT commenting this line), the defender will not perform any action in the simulations, for there is only one possible defensive action in our *exampleLang* and if the defense is already activated in the model, there are no actions left for the defender to carry out during the simulations.
 
 To instantiate the model, we will create another file called `tutorial1_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial1_simulation.py` file:
 
@@ -142,6 +142,8 @@ def main():
 
     # Create our example model
     model = create_model(example_lang)
+    print("Model created successfully!")
+    print(model)
 
 
 if __name__ == "__main__":
@@ -156,9 +158,10 @@ from maltoolbox.language import LanguageGraph
 from tutorial1_model import create_model
 ```
 
-By executing this code, we create a model using a language graph, which in turn has been defined using our MAL-Lang (*exampleLang.mal* --> *LanguageGraph* --> *Model*) . To do so, run the script with `python tutorial1_simulation.py`. The **expected result** from this should be a terminal with no errors. This is the Windows result, but the rest of OSs must be similar:
+By executing this code, we create a model using a language graph, which in turn has been defined using our MAL-Lang (*exampleLang.mal* --> *LanguageGraph* --> *Model*) . To do so, run the script with `python tutorial1_simulation.py`. The **expected result** should lool like this, regardless of the OS used to execute our script:
 ```bash
-(.venv) C:\\mal-tutorials\tutorials\tutorial1>c:mal-tutorials\tutorials\tutorial1\.venv\Scripts\python.exe c:/mal-tutorials/tutorials/tutorial1/tutorial1_simulation.py
+Model created successfully!
+Model(name: "my-model", language: LanguageGraph(id: "exampleLang", version: "2.0.0"))
 ```
 
 You can see the final version of `tutorial1_model.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_model.py).
@@ -185,8 +188,7 @@ If you would like to know more about the concepts ***LanguageGraph***, ***Model*
 To run simulations, add these imports to the top of the `tutorial1_simulation.py` file:
 
 ```python
-from malsim import MalSimulator, run_simulation, AttackerSettings
-from malsim.types import AgentSettings
+from malsim import MalSimulator, run_simulation, AttackerSettings, DefenderSettings
 from malsim.policies import RandomAgent
 ```
 
@@ -195,8 +197,8 @@ Now we can create a `MalSimulator` object from the attack graph `graph` and run 
 Add this to the end of the `main` function:
 
 ```python
-simulator = MalSimulator(graph)
-path = run_simulation(simulator, {})
+simulator = MalSimulator(graph, [])
+path = run_simulation(simulator)
 ```
 
 When we run `python tutorial1_simulation.py` we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
@@ -206,20 +208,21 @@ When we run `python tutorial1_simulation.py` we will just see "Simulation over a
 To do so, replace the previous code with:
 
 ```python
-# Create agent settings
-agent_settings: AgentSettings = {
-    "Attacker1": AttackerSettings(
-        "Attacker1",
-        entry_points={"Machine1:compromise"},
-        goals={"Machine2:compromise"},
-        policy=RandomAgent
-    )
-}
-simulator = MalSimulator(graph, agent_settings=agent_settings)
-run_simulation(simulator, agent_settings)
+    # Create agent settings
+    agent_settings = [
+        AttackerSettings(
+            "Attacker1",
+            entry_points={"Machine1:compromise"},
+            goals={"Machine2:compromise"},
+            policy=RandomAgent
+        )
+    ]
 
-import pprint
-pprint.pprint(simulator.recording)
+    simulator = MalSimulator(graph, agents=agent_settings)
+    run_simulation(simulator)
+
+    import pprint
+    pprint.pprint(simulator.recording)
 ```
 
 In this section, we define the `AttackerSettings` object:
@@ -294,18 +297,19 @@ The first step will be to comment line 17 `# credentials_for_machine_2.defenses 
 
 Now, we add a defender to the current `agent_settings`:
 ```python
-agent_settings: AgentSettings = {
-    "Attacker1": AttackerSettings(
-        "Attacker1",
-        entry_points={"Machine1:compromise"},
-        goals={"Machine2:compromise"},
-        policy=RandomAgent
-    ),
-    "Defender1": DefenderSettings(
-        "Defender1",
-        policy=RandomAgent
-    )
-}
+    # Create agent settings
+    agent_settings = [
+        AttackerSettings(
+            "Attacker1",
+            entry_points={"Machine1:compromise"},
+            goals={"Machine2:compromise"},
+            policy=RandomAgent
+        ),
+        DefenderSettings(
+            "Defender1",
+            policy=RandomAgent
+        )
+    ]
 ```
 In this section, we define the `DefenderSettings` object:
 - `Defender1`: the name we give to the defender agent.
