@@ -1,6 +1,6 @@
 # Tutorial 4 - How to use the MALSIM GUI
 
-In this tutorial we learn how to use the dedicated Graphical User Interface for the MALSIM tool, or malsim-gui. Before starting this tutorial, it is advisable to complete tutorials [1](https://github.com/mal-lang/mal-toolbox-tutorial/blob/main/tutorials/tutorial1/language-model-tutorial.md) and [2](https://github.com/mal-lang/mal-toolbox-tutorial/blob/main/tutorials/tutorial2/model-tutorial.md) on working with MAL languages, models, and simulations. This tutorial uses the malLang, model, attack graph, and simulation created and used in Tutorial 1.
+In this tutorial we learn how to use the dedicated Graphical User Interface for the mal-simulator, or malsim-gui. Before starting this tutorial, it is advisable to complete tutorials [1](https://github.com/mal-lang/mal-toolbox-tutorial/blob/main/tutorials/tutorial1/language-model-tutorial.md) and [2](https://github.com/mal-lang/mal-toolbox-tutorial/blob/main/tutorials/tutorial2/model-tutorial.md) on working with MAL languages, models, and simulations. This tutorial reuses the malLang, the model, the attack graph, and simulation created and used in Tutorial 1.
 
 ## Starting MALSIM GUI
 
