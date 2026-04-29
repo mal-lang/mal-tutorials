@@ -29,7 +29,7 @@ pip install mal-simulator
 ```
 
 ### mal-lang: tyrLang
-[tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), .... . tyrLang is a simpler version of coreLang. For this tutorial, we will use certain parts of tyrLang.
+[tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), which is very general and large language intended for common use cases within the IT domain. tyrLang is a simpler version of coreLang. For this tutorial, we will use certain parts of tyrLang.
 
 - `Network`, `InternetworkConnectionRule` and `ConnectionRule` assets, and `interNetConnections`, `appConnections` and `netConnections` association: can be found in tyrLang's `src/main/mal/Networking.mal` file.
 - `Application` asset in `src/main/mal/DataResources.mal` file.
@@ -114,7 +114,7 @@ def add_creds_to_user(model: Model, identity: ModelAsset, data_asset_name: str) 
 
 These helper functions are made to simplify the creation of the model. If you have followed the tutorials in order, you will see that the functions inside the helper functions (`add_asset`, `add_associated_assets`) were used in [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1). 
 
-Each function creates assets in a model and connects the assets to other assets using associations (association fieldnames to be more exact).
+Each function creates assets in a model and connects the assets to other assets using associations; association fieldnames to be more exact.
 
 ### Model Creation
 
