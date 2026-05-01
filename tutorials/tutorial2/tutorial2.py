@@ -86,13 +86,13 @@ def create_model(lang_graph: LanguageGraph) -> Model:
     connect_net_to_net(model, net_a, net_b)
 
     # Four apps with connections to networks
-    app1 = model.add_asset("Application", "App 1")
+    app1 = model.add_asset("Application", "App1")
     connect_app_to_net(model, app1, net_a)
-    app2 = model.add_asset("Application", "App 2")
+    app2 = model.add_asset("Application", "App2")
     connect_app_to_net(model, app2, net_a)
-    app3 = model.add_asset("Application", "App 3")
+    app3 = model.add_asset("Application", "App3")
     connect_app_to_net(model, app3, net_b)
-    app4 = model.add_asset("Application", "App 4")
+    app4 = model.add_asset("Application", "App4")
     connect_app_to_net(model, app4, net_b)
 
     # Add a vulnerability to app4

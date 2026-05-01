@@ -1,9 +1,4 @@
-import os
-
-from maltoolbox.language import LanguageGraph
 from maltoolbox.model import Model, ModelAsset
-
-from maltoolbox.visualization.graphviz_utils import render_model
 
 def connect_net_to_net(model: Model, net1: ModelAsset, net2: ModelAsset):
     """

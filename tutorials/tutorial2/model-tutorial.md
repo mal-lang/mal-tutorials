@@ -44,12 +44,7 @@ Create a python file in the directory called `tutorial2_utils.py` with the text 
 Copy this piece of code into `tutorial2_utils.py`:
 
 ```python
-import os
-
-from maltoolbox.language import LanguageGraph
 from maltoolbox.model import Model, ModelAsset
-
-from maltoolbox.visualization.graphviz_utils import render_model
 
 def connect_net_to_net(model: Model, net1: ModelAsset, net2: ModelAsset):
     """
@@ -121,50 +116,47 @@ Each function creates assets in a model and connects the assets to other assets 
 Let's create a model and use the helper functions. First, create a file called `tutorial2_model.py` and add this:
 
 ```python
-from maltoolbox.attackgraph import AttackGraph
-from maltoolbox.visualization.graphviz_utils import render_model, render_attack_graph
+from maltoolbox.model import Model
+from maltoolbox.language import LanguageGraph
+from tutorial2_utils import connect_net_to_net, connect_app_to_net, add_vulnerability_to_app, add_data_to_app, add_user_to_app, add_creds_to_user
 
 def create_model(lang_graph: LanguageGraph) -> Model:
-    """Create a model with 4 apps"""
     model = Model("my-model", lang_graph)
 
-    # Two networks
     net_a = model.add_asset("Network", "NetworkA")
     net_b = model.add_asset("Network", "NetworkB")
-    # Connection between networks
+
     connect_net_to_net(model, net_a, net_b)
 
-    # Four apps with connections to networks
-    app1 = model.add_asset("Application", "App 1")
+    app1 = model.add_asset("Application", "App1")
     connect_app_to_net(model, app1, net_a)
-    app2 = model.add_asset("Application", "App 2")
+    app2 = model.add_asset("Application", "App2")
     connect_app_to_net(model, app2, net_a)
-    app3 = model.add_asset("Application", "App 3")
+    app3 = model.add_asset("Application", "App3")
     connect_app_to_net(model, app3, net_b)
-    app4 = model.add_asset("Application", "App 4")
+    app4 = model.add_asset("Application", "App4")
     connect_app_to_net(model, app4, net_b)
 
-    # Add a vulnerability to app4
     add_vulnerability_to_app(model, app4)
 
-    # Add data to app4
     add_data_to_app(model, app4, "DataOnApp4")
 
-    # Add user to app3
     user_on_app_3 = add_user_to_app(model, app3, "UserOnApp3")
 
-    # Add user to app3
     add_creds_to_user(model, user_on_app_3, "User3Creds")
 
     return model
 ```
 
 In this simple function, we create:
-- Two instances of our `Machine` asset (`Machine1` and `Machine2`), one instance of the `Network` asset (`OfficeNet`), and one of instance of the `Credentials` asset (`CredentialsForM2`).
-- A connection between `Machine1`, `Machine2` and `OfficeNet`. The string `"parties"` comes from the `Communication` association in the MAL language we created.
-- A connection between `Machine1` and `CredentialsForM2`. The string `"storesCreds"` comes from the `Storage` association. 
-- A connection between `Machine2` and `CredentialsForM2`. The string `"authCreds"` comes from the `Access` association. 
-- The `credentials_for_machine_2.defenses = {'encrypted': 1.0}` activate the defense `encrypted` step in the `Credentials` asset. The `1.0` means the defense step is activated. If we didn't wish to activate the defense, we could comment this line.
+- Two instances of our `Network` asset (`NetworkA` and `NetworkB`). We connect them using our `connect_net_to_net` helper function, which uses a `InternetworkConnectionRule` asset and a `interNetConnections` association.
+- Four instances of our `Application` asset (`App1`, `App2`, `App3` and `App4`). Using our `connect_app_to_net` helper function, we connect them to our two networks using the `ConnectionRule` asset, and `appConnections` and `netConnections` associations:
+    - `App1` and `App2` are connected to `NetworkA`.
+    - `App3` and `App4` are connected to `NetworkB`.
+- Add a vulnerability to `App4` using our `add_vulnerability_to_app` helper function, which uses a `SoftwareVulnerability` asset and an `application` association.
+- Add data (`DataOnApp4`) to `App4` using our `add_data_to_app` helper function, which uses a `Data` asset and a `containingApp` association.
+- Add a user (`UserOnApp3`) to `App3` using our `add_user_to_app` helper function, which uses an `Identity` asset and an `execPrivApps` association.
+- Add credentials (`User3Creds`) to `UserOnApp3` using our `add_creds_to_user` helper function, which uses an `Credentials` asset and an `identities` association.
 
 To instantiate the model, we will create another file called `tutorial1_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial1_simulation.py` file:
 
