@@ -1,6 +1,0 @@
-I do not understand the colors in the renders. Please comment! (How are they decided?)
-TTC needs to be briefly explained
-explain how different policies are set
-I think it is good to show that you can have a defender agent but clarify that this is not needed and does not really make a difference in this example.
-again explain entry_points, goals, and policy under the AgentSettings
-can we make a Graphviz render of the attack path?
