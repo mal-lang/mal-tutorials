@@ -158,28 +158,35 @@ In this simple function, we create:
 - Add a user (`UserOnApp3`) to `App3` using our `add_user_to_app` helper function, which uses an `Identity` asset and an `execPrivApps` association.
 - Add credentials (`User3Creds`) to `UserOnApp3` using our `add_creds_to_user` helper function, which uses an `Credentials` asset and an `identities` association.
 
-To instantiate the model, we will create another file called `tutorial1_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial1_simulation.py` file:
+To instantiate the model, we will create another file called `tutorial2_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial2_simulation.py` file:
 
 ```python
+import os
+from maltoolbox.language import LanguageGraph
+from tutorial2_model import create_model
+
 def main():
-    lang_file = "/path/to/exampleLang.mal"
+    lang_file = "/path/to/tyrLang/main.mal"
     current_dir = os.path.dirname(os.path.abspath(__file__))
     lang_file_path = os.path.join(current_dir, lang_file)
-    example_lang = LanguageGraph.load_from_file(lang_file_path)
+    tyr_lang = LanguageGraph.load_from_file(lang_file_path)
 
-    # Create our example model
-    model = create_model(example_lang)
-
+    model = create_model(tyr_lang)
 
 if __name__ == "__main__":
     main()
 ```
 
+You can verify whether everything we have done up until this point is correct by running `python tutorial2_simulation.py`. If you don't see any output, the work is correct so far.
+
 ### Model & Attack Graph Rendering
+In this section, we will visualize our model and its corresponding attack graphs.
 
-For the next steps we need the tool **Graphviz**. If you do not have already installed it you might find more information about it in the following link: [How to download & install Graphviz](https://github.com/mal-lang/mal-toolbox?tab=readme-ov-file#requirements). 
+First, we need to create our attack graph in order to visualize it. In [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1), we went over them. Add this import `from maltoolbox.attackgraph import AttackGraph` to the other imports and add this line `attack_graph = AttackGraph(tyr_lang, model)` after the `create_model` one.
 
-Once Graphviz is installed, uncomment the line with 'render_model' and run the file with `python tutorial2.py` to see a [render](my-model.gv.pdf) of the model. This can be helpful to debug generated models. We also have a specific tool for visualizing and creating MAL models covered in [this tutorial](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial3/mal-gui-tutorial.md).
+For the next steps we need the tool **Graphviz**. If you are not familiar, you may find more information about it in the following link: [How to download & install Graphviz](https://github.com/mal-lang/mal-toolbox?tab=readme-ov-file#requirements). You can see other visualization options [here](https://github.com/mal-lang/mal-toolbox/wiki/visualization).
+
+Once Graphviz is installed, Add these imports `from maltoolbox.visualization.graphviz_utils import render_model, render_attack_graph` to the other imports and add this line `render_model(model)` after the `attack_graph` one. Run the file with `python tutorial2_simulation.py` to see a [render](my-model.gv.pdf) of the model. This can be helpful to debug generated models. We also have a specific tool for visualizing and creating MAL models covered in [this tutorial](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial3/mal-gui-tutorial.md).
 
 Then try it with the other line (render_graph) to see a [render](my-attack-graph.gv.pdf) of the attack graph. The attack graph contains all the attack steps and their relations in the model according to the definition in the MAL language, tyrLang in our case. Conceptually this represents the full blueprint of all possible attacks steps and attack paths possible in the model. As seen from the render, we see that even small models in simple languages easily become difficult to overview. Therefore, we typically would like to apply some form of analysis mechanism on the attack graph. 
 
