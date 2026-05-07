@@ -186,8 +186,12 @@ First, we need to create our attack graph in order to visualize it. In [tutorial
 
 For the next steps we need the tool **Graphviz**. If you are not familiar, you may find more information about it in the following link: [How to download & install Graphviz](https://github.com/mal-lang/mal-toolbox?tab=readme-ov-file#requirements). You can see other visualization options [here](https://github.com/mal-lang/mal-toolbox/wiki/visualization).
 
+#### Model visualization
 Once Graphviz is installed, Add these imports `from maltoolbox.visualization.graphviz_utils import render_model, render_attack_graph` to the other imports and add this line `render_model(model)` after the `attack_graph` one. Run the file with `python tutorial2_simulation.py` to see a [render](my-model.gv.pdf) of the model. This can be helpful to debug generated models. We also have a specific tool for visualizing and creating MAL models covered in [this tutorial](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial3/mal-gui-tutorial.md).
 
+`render_model` generates a `.gv` file, a plain text file written in the DOT graph description language, primarely used by Graphviz. This file is not human-friendly, so the function also outputs its corresponding `.pdf` file. In the PDF's graph, the assets/associations of the same type have the same color (chosen randomly). You can see the files in this tutorial's folder.
+
+#### Attack Graph visualization
 Then try it with the other line (render_graph) to see a [render](my-attack-graph.gv.pdf) of the attack graph. The attack graph contains all the attack steps and their relations in the model according to the definition in the MAL language, tyrLang in our case. Conceptually this represents the full blueprint of all possible attacks steps and attack paths possible in the model. As seen from the render, we see that even small models in simple languages easily become difficult to overview. Therefore, we typically would like to apply some form of analysis mechanism on the attack graph. 
 
 In the next section, we will use the `mal-simulator` to run simulations with different agents. In these simulations the agents steps through the full attack graph and produces a (typically partial) graph traversal path, conceptually mimicking the activity of red team penetration tests in the modeled system environment. 

@@ -13,8 +13,8 @@ def main():
     model = create_model(tyr_lang)
     attack_graph = AttackGraph(tyr_lang, model)
 
-    # render_model(model) # Uncomment to render graphviz pdf
-    # render_attack_graph(attack_graph) # Uncomment to render graphviz pdf
+    render_model(model) # Uncomment to render graphviz pdf
+    render_attack_graph(attack_graph) # Uncomment to render graphviz pdf
 
 if __name__ == "__main__":
     main()
