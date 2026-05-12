@@ -196,60 +196,54 @@ For the attack graph, add this line `render_attack_graph(attack_graph)` after th
 
 `render_attack_graph` also generates a `.gv` file and a `.pdf` file from it. The nodes color follow the same rules as the model graph. Additionally, in this one we have the nodes' edge colors, blue for defense steps and red for attack steps.
 
-In the next section, we will use the `mal-simulator` to run simulations with different agents. In these simulations the agents steps through the full attack graph and produces a (typically partial) graph traversal path, conceptually mimicking the activity of red team penetration tests in the modeled system environment. 
-
 ### Run Simulations
+In this section, we will use the `mal-simulator` to run simulations with different agents. In these simulations the agents steps through the full attack graph and produces a (typically partial) graph traversal path, conceptually mimicking the activity of red team penetration tests in the modeled system environment. 
 
 To run simulations, add these imports to the top of the file (below the other imports):
 
 ```python
 from malsim.mal_simulator import MalSimulator, run_simulation
-from malsim.config import AttackerSettings, DefenderSettings, MalSimulatorSettings, TTCMode
-from malsim.policies import RandomAgent, TTCSoftMinAttacker, PassiveAgent
+from malsim.config import AttackerSettings, MalSimulatorSettings, TTCMode
+from malsim.policies import RandomAgent
 ```
 
-Now we can create a MalSimulator from the attack graph and run simulations.
+Now we can create a `MalSimulator` object from the attack graph and run simulations.
 
 Add this to the end of the `main` function:
 
 ```python
-
 simulator = MalSimulator(graph)
 path = run_simulation(simulator, {})
-
 ```
 
-When we run `python tutorial2.py` now we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
+If we run `python tutorial2_simulation.py` now we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
 
 Replace the above code with:
 
 ```python
-    agent_settings = {
-        "MyAttacker": AttackerSettings(
-            "MyAttacker",
-            entry_points={"App 1:fullAccess"},
-            goals={'DataOnApp4:read'},
-            policy=TTCSoftMinAttacker,
-        ),
-        "MyDefender": DefenderSettings(
-            "MyDefender",
-            policy=PassiveAgent,
-        )
-    }
-    simulator = MalSimulator(
-        graph,
-        agent_settings=agent_settings,
-        sim_settings=MalSimulatorSettings(
-            ttc_mode=TTCMode.PRE_SAMPLE
-        )
-    )
+agent_settings = (
+    AttackerSettings(
+        "MyAttacker",
+        entry_points={"App1:fullAccess"},
+        goals={"DataOnApp4:read"},
+        policy=RandomAgent
+    ),
+)
 
-    run_simulation(simulator, agent_settings)
-    import pprint
-    pprint.pprint(simulator.recording)
+simulator = MalSimulator(
+    attack_graph,
+    agents=agent_settings,
+    sim_settings=MalSimulatorSettings(
+        ttc_mode=TTCMode.PRE_SAMPLE
+    )
+)
+
+run_simulation(simulator)
+import pprint
+pprint.pprint(simulator.recording)
 ```
 
-This creates a dict of agents that are used for registering agents and running policies with `run_simulation`. The attacker agent uses a policy which tries to take the easiest node (low TTC) every step and the defender is passive (does nothing).
+This creates a tuple of agents that are used for registering agents and running policies with `run_simulation`. The attacker agent uses a policy which tries to take the easiest node (low TTC) every step and the defender is passive (does nothing).
 
 When we run `python tutorial2.py` now, we can see that the simulation runs until the attacker reaches `DataOnApp4:read`. This tells us that there was a path from `App 1` to `DataOnApp4`.
 

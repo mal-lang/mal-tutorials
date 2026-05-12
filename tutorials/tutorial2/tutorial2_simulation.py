@@ -4,8 +4,8 @@ from maltoolbox.language import LanguageGraph
 from maltoolbox.attackgraph import AttackGraph
 from maltoolbox.visualization.graphviz_utils import render_model, render_attack_graph
 from malsim.mal_simulator import MalSimulator, run_simulation
-from malsim.config import AttackerSettings, DefenderSettings, MalSimulatorSettings, TTCMode
-from malsim.policies import RandomAgent, TTCSoftMinAttacker, PassiveAgent
+from malsim.config import AttackerSettings, MalSimulatorSettings, TTCMode
+from malsim.policies import RandomAgent
 
 def main():
     lang_file = "/Users/navas/sweden/amanuensis/tyrLang/src/main/mal/main.mal"
@@ -20,14 +20,14 @@ def main():
     # render_attack_graph(attack_graph) # Uncomment to render graphviz pdf
 
 
-    agent_settings: AgentSettings = {
-        "MyAttacker": AttackerSettings(
+    agent_settings = (
+        AttackerSettings(
             "MyAttacker",
             entry_points={"App1:fullAccess"},
             goals={"DataOnApp4:read"},
             policy=RandomAgent
-        )
-    }
+        ),
+    )
 
     simulator = MalSimulator(
         attack_graph,
