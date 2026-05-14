@@ -247,13 +247,15 @@ In this section, we define the `AttackerSettings` object:
 - `MyAttacker`: the name we give to the attacker agent.
 - `entry_points`: the node where we make the attacker start. An attacker can have more than one `entry_point`.
 - `goals`: the node or nodes that we want the attacker to reach. This is an optional parameter, so if no goal is set, the simulation is done when all possible nodes are reached. Otherwise, the simulation is finished when all the goals are reached.
-- `policy`: tells the `run_simulation` function which policy will be used (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
+- `policy`: tells the `run_simulation` function which policy will be used in the simulation (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
 
 And we also define the `MalSimulator` object:
 - `attack_graph`: the `AttackGraph` object we want to use for the simulation.
 - `agents`: the `AttackerSettings` object we want to use for the simulation. We will be using the one we have just created.
 - `sim_settings`: this is an optional parameter. It is a `MalSimulatorSettings` object and, in this case, we will define its `ttc_mode` property. You can see all its properties [here](https://github.com/mal-lang/mal-simulator/blob/main/malsim/config/sim_settings.py). TTC (Time to compromise) in a mal-sim context is different than in attack/defense steps. In a simulation, you can choose between four TTCs, in our case, `PRE_SAMPLE` means that the probability distribution for each attack step will be decremented gradually each time an agent tries to compromise it. You can read more about TTCs [here](https://github.com/mal-lang/mal-simulator/wiki/TTCs).
 - `run_simulation`: creates a tuple of agents that are used for registering agents and running policies.
+
+In this specific simulation, we haven't activated any of the defense steps, so we have not added a defender agent. You can learn how to activate them in [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1).
 
 When we run `python tutorial2_simulation.py` now, we can see that the simulation runs until the attacker reaches `DataOnApp4:read`. This tells us that there was a path from `App1` to `DataOnApp4`. You should see something like the following snippet on your terminal, but not an identical copy.
 
@@ -281,3 +283,5 @@ As we repeat the command, we can see that it reaches it on different iterations,
 `run_simulation` will return the recording of the simulation which can be found also in `simulator.recording`.
 
 See the finished script in [tutorial2_simulation.py](tutorial2_simulation.py).
+
+This tutorial has shown how to use an existing mal-lang, and create a model, a language graph, an attack graph and run a simulation from it. [Tutorial 3](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial3) will cover the mal-gui, a graphical user interface tool used to create/import MAL models and scenarios.
