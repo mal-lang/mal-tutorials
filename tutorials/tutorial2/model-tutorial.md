@@ -243,14 +243,41 @@ import pprint
 pprint.pprint(simulator.recording)
 ```
 
-This creates a tuple of agents that are used for registering agents and running policies with `run_simulation`. The attacker agent uses a policy which tries to take the easiest node (low TTC) every step and the defender is passive (does nothing).
+In this section, we define the `AttackerSettings` object:
+- `MyAttacker`: the name we give to the attacker agent.
+- `entry_points`: the node where we make the attacker start. An attacker can have more than one `entry_point`.
+- `goals`: the node or nodes that we want the attacker to reach. This is an optional parameter, so if no goal is set, the simulation is done when all possible nodes are reached. Otherwise, the simulation is finished when all the goals are reached.
+- `policy`: tells the `run_simulation` function which policy will be used (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
 
-When we run `python tutorial2.py` now, we can see that the simulation runs until the attacker reaches `DataOnApp4:read`. This tells us that there was a path from `App 1` to `DataOnApp4`.
+And we also define the `MalSimulator` object:
+- `attack_graph`: the `AttackGraph` object we want to use for the simulation.
+- `agents`: the `AttackerSettings` object we want to use for the simulation. We will be using the one we have just created.
+- `sim_settings`: this is an optional parameter. It is a `MalSimulatorSettings` object and, in this case, we will define its `ttc_mode` property. You can see all its properties [here](https://github.com/mal-lang/mal-simulator/blob/main/malsim/config/sim_settings.py). TTC (Time to compromise) in a mal-sim context is different than in attack/defense steps. In a simulation, you can choose between four TTCs, in our case, `PRE_SAMPLE` means that the probability distribution for each attack step will be decremented gradually each time an agent tries to compromise it. You can read more about TTCs [here](https://github.com/mal-lang/mal-simulator/wiki/TTCs).
+- `run_simulation`: creates a tuple of agents that are used for registering agents and running policies.
 
-As we repeat the command, we can see that it reaches it on different iterations, since it is a probabilistic agent.
+When we run `python tutorial2_simulation.py` now, we can see that the simulation runs until the attacker reaches `DataOnApp4:read`. This tells us that there was a path from `App1` to `DataOnApp4`. You should see something like the following snippet on your terminal, but not an identical copy.
 
-Try this out with different policies in `malsim.policies`.
+```bash
+Iteration 0
+---
+Iteration 1
+---
+...
+---
+Simulation over after 93 steps.
+Total reward "MyAttacker" -1.0
+defaultdict(<class 'dict'>,
+            {1: {'MyAttacker': [AttackGraphNode(name: "App1:attemptModify", id: 32, type: or)]},
+             2: {'MyAttacker': [AttackGraphNode(name: "App1:accessNetworkAndConnections", id: 24, type: or)]},
+             3: {'MyAttacker': [AttackGraphNode(name: "App1:attemptRead", id: 29, type: or)]},
+             4: {'MyAttacker': [AttackGraphNode(name: "ConnectionRule App1 NetworkA:attemptAccessNetworks", id: 41, type: or)]},
+             ...
+             92: {'MyAttacker': [AttackGraphNode(name: "DataOnApp4:deny", id: 159, type: or)]},
+             93: {'MyAttacker': [AttackGraphNode(name: "DataOnApp4:read", id: 141, type: or)]}})
+```
+
+As we repeat the command, we can see that it reaches it on different iterations, since it is a probabilistic agent. You can try this out with different policies in `malsim.policies`.
 
 `run_simulation` will return the recording of the simulation which can be found also in `simulator.recording`.
 
-See the finished script in [tutorial2.py](tutorial2.py).
+See the finished script in [tutorial2_simulation.py](tutorial2_simulation.py).
