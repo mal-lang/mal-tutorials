@@ -1,0 +1,49 @@
+#id: "exampleLang"
+#version: "2.0.0"
+
+category System {
+
+    asset Machine {
+        | connect
+            -> authCompromise
+
+        | authenticate
+            -> authCompromise
+
+        & authCompromise
+            -> compromise
+
+        | compromise
+            -> storesCreds.access,
+               networks.communicate
+    }
+
+    asset Credentials {
+        | access
+            -> useUnencrypted,
+               crack
+
+        & useUnencrypted
+            -> use
+
+        | crack [HardAndCertain]
+            -> use
+
+        | use
+            -> authenticates.authenticate
+
+        # encrypted
+            -> useUnencrypted
+    }
+
+    asset Network {
+        | communicate
+            -> parties.connect
+    }
+}
+
+associations {
+    Machine [parties] * <-- Communication --> * [networks] Network
+    Machine [storedOn] 0..1 <-- Storage --> * [storesCreds] Credentials
+    Machine [authenticates] 0..1 <-- Access --> * [authCreds] Credentials
+}
