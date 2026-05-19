@@ -1,6 +1,5 @@
 # Tutorial 2 - Create model and run simulations
-
-In this tutorial you will learn how to load a language, create a model and run simulations on the generated attack graph.
+In this tutorial, we will learn how to load a pre-existing language, create a model and run simulations on the generated attack graph. It is recommended to follow [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1) before this one.
 
 ## Step by step
 ### Environment set-up
@@ -8,7 +7,7 @@ Create a directory for the tutorial:
 
 `mkdir mal-tutorial2 && cd mal-tutorial2`
 
-Download tyrLang from github and put tyrLang in the directory:
+We will use **tyrLang** as the mal-lang. Download it from Github and put tyrLang in the working directory:
 
 `git clone https://github.com/mal-lang/tyrLang.git`
 
@@ -29,24 +28,27 @@ pip install mal-toolbox
 pip install mal-simulator
 ```
 
+### mal-lang: tyrLang
+[tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), which is very general and large language intended for common use cases within the IT domain. tyrLang is a simpler version of coreLang. For this tutorial, we will use certain parts of tyrLang.
+
+- `Network`, `InternetworkConnectionRule` and `ConnectionRule` assets, and `interNetConnections`, `appConnections` and `netConnections` association: can be found in tyrLang's `src/main/mal/Networking.mal` file.
+- `Application` asset in `src/main/mal/DataResources.mal` file.
+- `SoftwareVulnerability` asset, and `application` association in `src/main/mal/Vulnerability.mal` file.
+- `Data` asset, and `containingApp` association in `src/main/mal/DataResources.mal` file.
+- `Identity` and `Credentials` assets, and `execPrivApps` and `identities` associations in `src/main/mal/IAM.mal` file.
+
 ### Helper Functions
 
-Create a python file in the directory called `tutorial2.py` with your text editor of choice.
+Create a python file in the directory called `tutorial2_utils.py` with the text editor of choice.
 
-Copy this piece of code into `tutorial2.py`:
+Copy this piece of code into `tutorial2_utils.py`:
 
 ```python
-
-import os
-
-from maltoolbox.language import LanguageGraph
 from maltoolbox.model import Model, ModelAsset
-
-from maltoolbox.visualization.graphviz_utils import render_model
 
 def connect_net_to_net(model: Model, net1: ModelAsset, net2: ModelAsset):
     """
-    Create a connection rule between net1 and net 2 and return it.
+    Create a connection rule (name of the asset) between net1 and net 2 and return it.
     """
     cr_asset_name = f"ConnectionRule {net1.name} {net2.name}"
     cr_asset = model.add_asset("InternetworkConnectionRule", cr_asset_name)
@@ -57,7 +59,7 @@ def connect_net_to_net(model: Model, net1: ModelAsset, net2: ModelAsset):
 
 def connect_app_to_net(model: Model, app: ModelAsset, net: ModelAsset) -> ModelAsset:
     """
-    Create a connection rule between app and net and return it.
+    Create a connection rule (name of the asset) between app and net and return it.
     """
     cr_asset_name = f"ConnectionRule {app.name} {net.name}"
     cr_asset = model.add_asset("ConnectionRule", cr_asset_name)
@@ -103,148 +105,184 @@ def add_creds_to_user(model: Model, identity: ModelAsset, data_asset_name: str) 
     creds_asset = model.add_asset("Credentials", data_asset_name)
     creds_asset.add_associated_assets("identities", {identity})
     return creds_asset
-
 ```
 
-These helper functions are made to work with the MAL language tyrLang, association fieldnames and asset types are specific per language. Therefore, they would need to be adapted depending on the MAL language in use.
+These helper functions are made to simplify the creation of the model. If you have followed the tutorials in order, you will see that the functions inside the helper functions (`add_asset`, `add_associated_assets`) were used in [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1). 
 
-Each function creates assets in a model and connects the assets to other assets using associations (associatoin fieldnames to be more exact).
+Each function creates assets in a model and connects the assets to other assets using associations; association fieldnames to be more exact.
 
 ### Model Creation
 
-Let's create a model and use the helper functions. First, add these imports to the others at the beginning of the python file:
+Let's create a model and use the helper functions. First, create a file called `tutorial2_model.py` and add this:
 
 ```python
-from maltoolbox.attackgraph import AttackGraph
-from maltoolbox.visualization.graphviz_utils import render_model, render_attack_graph
-```
+from maltoolbox.model import Model
+from maltoolbox.language import LanguageGraph
+from tutorial2_utils import connect_net_to_net, connect_app_to_net, add_vulnerability_to_app, add_data_to_app, add_user_to_app, add_creds_to_user
 
-Then, add this to the end of the file:
-
-```python
 def create_model(lang_graph: LanguageGraph) -> Model:
-    """Create a model with 4 apps"""
     model = Model("my-model", lang_graph)
 
-    # Two networks
     net_a = model.add_asset("Network", "NetworkA")
     net_b = model.add_asset("Network", "NetworkB")
-    # Connection between networks
+
     connect_net_to_net(model, net_a, net_b)
 
-    # Four apps with connections to networks
-    app1 = model.add_asset("Application", "App 1")
+    app1 = model.add_asset("Application", "App1")
     connect_app_to_net(model, app1, net_a)
-    app2 = model.add_asset("Application", "App 2")
+    app2 = model.add_asset("Application", "App2")
     connect_app_to_net(model, app2, net_a)
-    app3 = model.add_asset("Application", "App 3")
+    app3 = model.add_asset("Application", "App3")
     connect_app_to_net(model, app3, net_b)
-    app4 = model.add_asset("Application", "App 4")
+    app4 = model.add_asset("Application", "App4")
     connect_app_to_net(model, app4, net_b)
 
-    # Add a vulnerability to app4
     add_vulnerability_to_app(model, app4)
 
-    # Add data to app4
     add_data_to_app(model, app4, "DataOnApp4")
 
-    # Add user to app3
     user_on_app_3 = add_user_to_app(model, app3, "UserOnApp3")
 
-    # Add user to app3
     add_creds_to_user(model, user_on_app_3, "User3Creds")
 
     return model
+```
 
+In this simple function, we create:
+- Two instances of our `Network` asset (`NetworkA` and `NetworkB`). We connect them using our `connect_net_to_net` helper function, which uses a `InternetworkConnectionRule` asset and a `interNetConnections` association.
+- Four instances of our `Application` asset (`App1`, `App2`, `App3` and `App4`). Using our `connect_app_to_net` helper function, we connect them to our two networks using the `ConnectionRule` asset, and `appConnections` and `netConnections` associations:
+    - `App1` and `App2` are connected to `NetworkA`.
+    - `App3` and `App4` are connected to `NetworkB`.
+- Add a vulnerability to `App4` using our `add_vulnerability_to_app` helper function, which uses a `SoftwareVulnerability` asset and an `application` association.
+- Add data (`DataOnApp4`) to `App4` using our `add_data_to_app` helper function, which uses a `Data` asset and a `containingApp` association.
+- Add a user (`UserOnApp3`) to `App3` using our `add_user_to_app` helper function, which uses an `Identity` asset and an `execPrivApps` association.
+- Add credentials (`User3Creds`) to `UserOnApp3` using our `add_creds_to_user` helper function, which uses an `Credentials` asset and an `identities` association.
+
+To instantiate the model, we will create another file called `tutorial2_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial2_simulation.py` file:
+
+```python
+import os
+from maltoolbox.language import LanguageGraph
+from tutorial2_model import create_model
 
 def main():
-    lang_file = "tyrLang/src/main/mal/main.mal"
+    lang_file = "/path/to/tyrLang/main.mal"
     current_dir = os.path.dirname(os.path.abspath(__file__))
     lang_file_path = os.path.join(current_dir, lang_file)
     tyr_lang = LanguageGraph.load_from_file(lang_file_path)
 
-    # Create our example model
     model = create_model(tyr_lang)
 
-    # Generate an attack graph from the model
-    graph = AttackGraph(tyr_lang, model)
-
-    # render_model(model) # Uncomment to render graphviz pdf
-    # render_attack_graph(graph) # Uncomment to render graphviz pdf
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 ```
 
+You can verify whether everything we have done up until this point is correct by running `python tutorial2_simulation.py`. If you don't see any output, the work is correct so far.
+
 ### Model & Attack Graph Rendering
+In this section, we will visualize our model and its corresponding attack graphs.
 
-For the next steps you need the tool **Graphviz**. If you do not have already installed it you might find more information about it in the following link: [How to download & install Graphviz](https://github.com/mal-lang/mal-toolbox?tab=readme-ov-file#requirements). 
+First, we need to create our attack graph in order to visualize it. In [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1), we went over them. Add this import `from maltoolbox.attackgraph import AttackGraph` to the other imports and add this line `attack_graph = AttackGraph(tyr_lang, model)` after the `create_model` one.
 
-Once Graphviz is installed, uncomment the line with 'render_model' and run the file with `python tutorial2.py` to see a [render](my-model.gv.pdf) of the model. This can be helpful to debug generated models. We also have a specific tool for visualizing and creating MAL models covered in [this tutorial](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial3/mal-gui-tutorial.md).
+For the next steps we need the tool **Graphviz**. If you are not familiar, you may find more information about it in the following link: [How to download & install Graphviz](https://github.com/mal-lang/mal-toolbox?tab=readme-ov-file#requirements). You can see other visualization options [here](https://github.com/mal-lang/mal-toolbox/wiki/visualization).
 
-Then try it with the other line (render_graph) to see a [render](my-attack-graph.gv.pdf) of the attack graph. The attack graph contains all the attack steps and their relations in the model according to the definition in the MAL language, tyrLang in our case. Conceptually this represents the full blueprint of all possible attacks steps and attack paths possible in the model. As seen from the render, we see that even small models in simple languages easily become difficult to overview. Therefore, we typically would like to apply some form of analysis mechanism on the attack graph. 
+#### Model visualization
+Once Graphviz is installed, add these imports `from maltoolbox.visualization.graphviz_utils import render_model, render_attack_graph` to the other imports and add this line `render_model(model)` after the `attack_graph` one. Run the file with `python tutorial2_simulation.py` to see a render of the model. This can be helpful to debug generated models. We also have a specific tool for visualizing and creating MAL models covered in [this tutorial](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial3/mal-gui-tutorial.md).
 
-In the next section we will use the `mal-simulator` to run simulations with different agents. In these simulations the agents steps through the full attack graph and produces a (typically partial) graph traversal path, conceptually mimicking the activity of red team penetration tests in the modeled system environment. 
+`render_model` generates a `.gv` file, a plain text file written in the DOT graph description language, primarely used by Graphviz. This file is not human-friendly, so the function also outputs its corresponding `.pdf` file. In the PDF's graph, the assets/associations of the same type have the same color (chosen randomly). You can see the files in this tutorial's folder.
+
+#### Attack Graph visualization
+For the attack graph, add this line `render_attack_graph(attack_graph)` after the `render_model` one. The attack graph contains all the attack steps and their relations in the model according to the definition in the MAL language, **tyrLang** in our case. Conceptually this represents the full blueprint of all possible attacks steps and attack paths possible in the model. As seen from the render, we see that even small models in simple languages easily become difficult to overview. Therefore, we typically would like to apply some form of analysis mechanism on the attack graph.
+
+`render_attack_graph` also generates a `.gv` file and a `.pdf` file from it. The nodes color follow the same rules as the model graph. Additionally, in this one we have the nodes' edge colors, blue for defense steps and red for attack steps.
 
 ### Run Simulations
+In this section, we will use the `mal-simulator` to run simulations with different agents. In these simulations the agents steps through the full attack graph and produces a (typically partial) graph traversal path, conceptually mimicking the activity of red team penetration tests in the modeled system environment. 
 
 To run simulations, add these imports to the top of the file (below the other imports):
 
 ```python
 from malsim.mal_simulator import MalSimulator, run_simulation
-from malsim.config import AttackerSettings, DefenderSettings, MalSimulatorSettings, TTCMode
-from malsim.policies import RandomAgent, TTCSoftMinAttacker, PassiveAgent
+from malsim.config import AttackerSettings, MalSimulatorSettings, TTCMode
+from malsim.policies import RandomAgent
 ```
 
-Now we can create a MalSimulator from the attack graph and run simulations.
+Now we can create a `MalSimulator` object from the attack graph and run simulations.
 
 Add this to the end of the `main` function:
 
 ```python
-
 simulator = MalSimulator(graph)
 path = run_simulation(simulator, {})
-
 ```
 
-When we run `python tutorial2.py` now we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
+If we run `python tutorial2_simulation.py` now we will just see "Simulation over after 0 steps.". This is because we don't have any agents. Let us add an attacker agent.
 
 Replace the above code with:
 
 ```python
-    agent_settings = {
-        "MyAttacker": AttackerSettings(
-            "MyAttacker",
-            entry_points={"App 1:fullAccess"},
-            goals={'DataOnApp4:read'},
-            policy=TTCSoftMinAttacker,
-        ),
-        "MyDefender": DefenderSettings(
-            "MyDefender",
-            policy=PassiveAgent,
-        )
-    }
-    simulator = MalSimulator(
-        graph,
-        agent_settings=agent_settings,
-        sim_settings=MalSimulatorSettings(
-            ttc_mode=TTCMode.PRE_SAMPLE
-        )
-    )
+agent_settings = (
+    AttackerSettings(
+        "MyAttacker",
+        entry_points={"App1:fullAccess"},
+        goals={"DataOnApp4:read"},
+        policy=RandomAgent
+    ),
+)
 
-    run_simulation(simulator, agent_settings)
-    import pprint
-    pprint.pprint(simulator.recording)
+simulator = MalSimulator(
+    attack_graph,
+    agents=agent_settings,
+    sim_settings=MalSimulatorSettings(
+        ttc_mode=TTCMode.PRE_SAMPLE
+    )
+)
+
+run_simulation(simulator)
+import pprint
+pprint.pprint(simulator.recording)
 ```
 
-This creates a dict of agents that are used for registering agents and running policies with `run_simulation`. The attacker agent uses a policy which tries to take the easiest node (low TTC) every step and the defender is passive (does nothing).
+In this section, we define the `AttackerSettings` object:
+- `MyAttacker`: the name we give to the attacker agent.
+- `entry_points`: the node where we make the attacker start. An attacker can have more than one `entry_point`.
+- `goals`: the node or nodes that we want the attacker to reach. This is an optional parameter, so if no goal is set, the simulation is done when all possible nodes are reached. Otherwise, the simulation is finished when all the goals are reached.
+- `policy`: tells the `run_simulation` function which policy will be used in the simulation (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
 
-When we run `python tutorial2.py` now, we can see that the simulation runs until the attacker reaches `DataOnApp4:read`. This tells us that there was a path from `App 1` to `DataOnApp4`.
+And we also define the `MalSimulator` object:
+- `attack_graph`: the `AttackGraph` object we want to use for the simulation.
+- `agents`: the `AttackerSettings` object we want to use for the simulation. We will be using the one we have just created.
+- `sim_settings`: this is an optional parameter. It is a `MalSimulatorSettings` object and, in this case, we will define its `ttc_mode` property. You can see all its properties [here](https://github.com/mal-lang/mal-simulator/blob/main/malsim/config/sim_settings.py). TTC (Time to compromise) in a mal-sim context is different than in attack/defense steps. In a simulation, you can choose between four TTC *modes*, in our case, `PRE_SAMPLE` means that we sample each distribution before running the simulator. We decrement the sampled number for each attack step that is attempted until it is lower than 1, then the attack suceeds. You can read more about TTC modes [here](https://github.com/mal-lang/mal-simulator/wiki/TTCs).
+    - For example, `guessCredentials` is an attack step of the asset `Credentials` that has a `HardAndUncertain` TTC. This means that with PRE_SAMPLE set as TTC mode, the simulator will sample a number from the `HardAndUncertain` distribution for each `guesssCredentials` and store these. When an attacker tries `User3Creds:guessCredentials`, it will decrement the number until it is lowe than one, then the step suceeds. You can see all the distributions for TTCs [here](https://github.com/mal-lang/malcompiler/wiki/Supported-distribution-functions).
+- `run_simulation`: creates a tuple of agents that are used for registering agents and running policies.
 
-As we repeat the command, we can see that it reaches it on different iterations, since it is a probabilistic agent.
+In this specific simulation, we haven't activated any of the defense steps, so we have not added a defender agent. You can learn how to activate them in [tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1).
 
-Try this out with different policies in `malsim.policies`.
+When we run `python tutorial2_simulation.py` now, we can see that the simulation runs until the attacker reaches `DataOnApp4:read`. This tells us that there was a path from `App1` to `DataOnApp4`. You should see something like the following snippet on your terminal, but not an identical copy.
 
-`run_simulation` will return the recording of the simulation which can be found also in `simulator.recording`.
+```bash
+Iteration 0
+---
+Iteration 1
+---
+...
+---
+Simulation over after 93 steps.
+Total reward "MyAttacker" -1.0
+defaultdict(<class 'dict'>,
+            {1: {'MyAttacker': [AttackGraphNode(name: "App1:attemptModify", id: 32, type: or)]},
+             2: {'MyAttacker': [AttackGraphNode(name: "App1:accessNetworkAndConnections", id: 24, type: or)]},
+             3: {'MyAttacker': [AttackGraphNode(name: "App1:attemptRead", id: 29, type: or)]},
+             4: {'MyAttacker': [AttackGraphNode(name: "ConnectionRule App1 NetworkA:attemptAccessNetworks", id: 41, type: or)]},
+             ...
+             92: {'MyAttacker': [AttackGraphNode(name: "DataOnApp4:deny", id: 159, type: or)]},
+             93: {'MyAttacker': [AttackGraphNode(name: "DataOnApp4:read", id: 141, type: or)]}})
+```
 
-See the finished script in [tutorial2.py](tutorial2.py).
+As we repeat the command, we can see that it reaches it on different iterations, since it is a probabilistic agent. You can try this out with different policies in `malsim.policies`.
+
+`run_simulation` will return the recording of the simulation (`simulator.recording`) which is what we print in the terminal, a list of `AttackGraphNodes`.
+
+See the finished script in [tutorial2_simulation.py](tutorial2_simulation.py).
+
+This tutorial has shown how to use an existing mal-lang, and create a model, a language graph, an attack graph and run a simulation from it. [Tutorial 3](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial3) will cover the mal-gui, a graphical user interface tool used to create/import MAL models and scenarios.
