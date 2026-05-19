@@ -19,7 +19,6 @@ def main():
     # render_model(model) # Uncomment to render graphviz pdf
     # render_attack_graph(attack_graph) # Uncomment to render graphviz pdf
 
-
     agent_settings = (
         AttackerSettings(
             "MyAttacker",
