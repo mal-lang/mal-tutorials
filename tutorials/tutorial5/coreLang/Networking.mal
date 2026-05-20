@@ -1,0 +1,325 @@
+/*
+ * Copyright 2019-2022 coreLang contributors <https://mal-lang.org/coreLang/contributors.html>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+category Networking {
+
+    asset Network
+      user info: "A network (zone) is a set of network accessible applications and data."
+      developer info: "The network asset tries to cover all the levels of the OSI stack in a very abstract and compact way (i.e. it tries to represent all the OSI layers). For example it will try to cover both ARP attacks (that are Level 2) but also DNS/HTTP spoofing attacks (that are Level 7)."
+    {
+      let outboundAllowedConnections = (netConnections \/ outgoingNetConnections)
+      let inboundAllowedConnections = (netConnections \/ ingoingNetConnections \/ diodeIngoingNetConnections)
+      let allNetConnections = (netConnections \/ ingoingNetConnections \/ outgoingNetConnections \/ diodeIngoingNetConnections)
+      let allowedApplicationConnectionsApplications = (applications \/ allNetConnections().applications)
+
+      | physicalAccess @entrypoint {C, A}
+        user info: "Attacker has physical access on the network. This means they can cut wires/fibers, connect using iLOs, eavesdrop and get proper network access."
+        modeler info: "This attack step can be used as an entry point when analyzing scenarios that involve gaining physical access to assets."
+        ->  deny,
+            attemptAccessUninspectedFromPhysicalAccess,
+            attemptAccessInspectedFromPhysicalAccess,
+            bypassEavesdropDefenseFromPhysicalAccess,
+            bypassAdversaryInTheMiddleDefenseFromPhysicalAccess
+
+      | bypassEavesdropDefenseFromPhysicalAccess
+        user info: "The eavesdrop defense can be bypassed more easily if the attacker has physical access to the network. This attack step will add its impact to the unconditional bypass."
+        ->  eavesdropDefenseBypassed
+
+      | bypassAdversaryInTheMiddleDefenseFromPhysicalAccess
+        user info: "The adversary in the middle defense can be bypassed more easily if the attacker has physical access to the network. This attack step will add its impact to the unconditional bypass."
+        ->  adversaryInTheMiddleDefenseBypassed
+
+      # networkAccessControl
+        user info: "Access control protects from unauthorized physical access on the network."
+        ->  accessControlBypassed
+
+      | bypassAccessControl [VeryHardAndUncertain]
+        user info: "If access control is enabled, the attacker can still try to bypass it and gain access on the network."
+        ->  accessControlBypassed
+
+      | accessControlBypassed @hidden
+        developer info: "Access control is bypassed either because it was not set, the attacker was able to circumvent it through additional effort."
+        ->  successfulAccessUninspectedFromPhysicalAccess,
+            successfulAccessInspectedFromPhysicalAccess
+
+      | attemptAccessUninspectedFromPhysicalAccess @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  successfulAccessUninspectedFromPhysicalAccess,
+            bypassAccessControl
+
+      | attemptAccessInspectedFromPhysicalAccess @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  successfulAccessInspectedFromPhysicalAccess,
+            bypassAccessControl
+
+      & successfulAccessUninspectedFromPhysicalAccess @hidden
+        developer info: "Intermediate attack step to model defenses."
+        ->  accessUninspected
+
+      & successfulAccessInspectedFromPhysicalAccess @hidden
+        developer info: "Intermediate attack step to model defenses."
+        ->  accessInspected
+
+      | accessUninspected
+        user info: "Uninspected access provides connect to all reachable applications without any restrictions."
+        ->  outboundAllowedConnections().attemptConnectToApplicationsUninspected,
+            applications.networkConnectUninspected,
+            networkForwardingUninspected,
+            attemptReverseReach,
+            accessNetworkData,
+            deny
+
+      | accessInspected
+        user info: "Inspected access provides connect to all reachable applications, but with limitations."
+        ->  outboundAllowedConnections().attemptConnectToApplicationsInspected,
+            applications.networkConnectInspected,
+            networkForwardingInspected,
+            accessNetworkData,
+            deny
+
+      | attemptReverseReach @hidden
+        developer info: "Intermediate attack step to allow for defenses."
+        ->  reverseReach
+
+      & reverseReach @hidden
+        developer info: "Reverse reach is used to determine whether or not the attacker can be reached by the user. Reverse reach propagates toward outgoing or bidirectional communications."
+        ->  inboundAllowedConnections().attemptReverseReach,
+            applications.attemptReverseReach
+
+      | networkForwardingUninspected @hidden
+        developer info: "By using the allowed connections (connection rules), uninspected forwarding from one network to another network or applications can happen."
+          ->  outboundAllowedConnections().attemptAccessNetworksUninspected,
+              outboundAllowedConnections().attemptConnectToApplicationsUninspected,
+              networkForwardingInspected
+
+      | networkForwardingInspected @hidden
+        developer info: "By using the allowed connections (connection rules), inspected forwarding from one network to another network or applications can happen."
+          ->  outboundAllowedConnections().attemptAccessNetworksInspected,
+              outboundAllowedConnections().attemptConnectToApplicationsInspected
+
+      | deny {A}
+        user info: "If a DoS is performed it affects, the applications communicating over the network as well as the connected application."
+        ->  allNetConnections().attemptDeny,
+            allowedApplicationConnectionsApplications().denyFromNetworkingAsset
+
+      | accessNetworkData @hidden
+        developer info: "Access also the data that are network-wide available."
+        ->  attemptEavesdrop,
+            attemptAdversaryInTheMiddle
+
+      # eavesdropDefense
+        user info: "This defense protects from eavesdrop attacks. If this defense is disabled, then it is equivalent to the network being considered a broadcast network."
+        modeler info: "If this defense is enabled, attacks such as ARP spoofing should however, still be possible."
+        ->  eavesdropDefenseBypassed
+
+      | bypassEavesdropDefense [VeryHardAndUncertain]
+        user info: "The eavesdrop defense can be bypassed."
+        ->  eavesdropDefenseBypassed
+
+      | eavesdropDefenseBypassed @hidden
+        developer info: "The Eavesdrop defense is bypassed either because it was not set, the attacker was able to circumvent it through additional effort."
+        ->  successfulEavesdrop
+
+      | attemptEavesdrop @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  successfulEavesdrop,
+            bypassEavesdropDefense
+
+      & successfulEavesdrop @hidden
+        developer info: "Intermediate attack step to model defenses."
+        ->  eavesdrop
+
+      | eavesdrop {C}
+        user info: "An attacker that performs an eavesdrop attack on a network tries to access all the transferred data over that network."
+        ->  transitData.attemptRead
+
+      # adversaryInTheMiddleDefense
+        user info: "This defense protects against adversary-in-the-middle (AitM) attacks that are originating either form the network layer (like ARP spoofing) or by manipulating the higher network layers (like DNS poisoning)."
+        ->  adversaryInTheMiddleDefenseBypassed
+
+      | bypassAdversaryInTheMiddleDefense [VeryHardAndUncertain]
+        user info: "The adversary in the middle defense can be bypassed."
+        ->  adversaryInTheMiddleDefenseBypassed
+
+      | adversaryInTheMiddleDefenseBypassed @hidden
+        developer info: "The adversary in the middle defense is bypassed either because it was not set, the attacker was able to circumvent it through additional effort."
+        ->  successfulAdversaryInTheMiddle
+
+      | attemptAdversaryInTheMiddle @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  successfulAdversaryInTheMiddle,
+            bypassAdversaryInTheMiddleDefense
+
+      & successfulAdversaryInTheMiddle @hidden
+        developer info: "Intermediate attack step to model defenses."
+        ->  adversaryInTheMiddle
+
+      | adversaryInTheMiddle {C, I}
+        user info: "An attacker that performs a AitM attack on a network tries to read and modify all the transferred data over that network."
+        ->  eavesdrop,
+            transitData.attemptWrite,
+            transitData.attemptApplicationRespondConnect
+    }
+
+    asset RoutingFirewall extends Application
+      user info: "A routing firewall specifies a router with firewall capabilities that connects many networks."
+    {
+      | deny {A}
+       user info: "A DoS attack should cascade on the connected networks and associated connections"
+        ->  connectionRules.attemptDeny
+
+      | fullAccess {I, A}
+        developer info: "If full access is achieved on RoutingFirewall then it is 0wned and all connections can be allowed! This can happen by compromising the manager application."
+        +>  (connectionRules.networks \/ connectionRules.outNetworks \/ connectionRules.inNetworks \/ connectionRules.diodeInNetworks).accessUninspected,
+            connectionRules.applications.networkConnectUninspected
+    }
+
+    asset ConnectionRule
+      user info: "This asset is used to model firewall rules between Applications and/or Networks. The association selected (bi/uni-directional) only describes the connection initiation."
+      developer info: "This asset is mainly used to model the functionality of a network connection through a firewall. If Data is added, then it also models the data in transit."
+    {
+      let allApplications = (applications \/ inApplications \/ outApplications)
+      let senderApplications = (applications \/ outApplications)
+      let receiverApplications = (applications \/ inApplications)
+
+      # restricted [Disabled]
+        user info: "The restricted defense can be used to probabilistically model the likelihood of both the protocols required by the attack being enabled or the existence of the ConnectionRule altogether."
+        ->  restrictedBypassed
+
+      | bypassRestricted [VeryHardAndUncertain]
+        user info: "The restricted defense can be bypassed."
+        ->  restrictedBypassed
+
+      | restrictedBypassed @hidden
+        developer info: "The restricted defense is bypassed either because it was not set, the attacker was able to circumvent it through additional effort."
+        ->  successfulAccessNetworksUninspected,
+            successfulAccessNetworksInspected,
+            connectToApplicationsUninspected,
+            connectToApplicationsInspected,
+            deny,
+            reverseReach
+
+      # payloadInspection [Disabled]
+        user info: "If enabled, then the traffic is considered to be inspected and filtered by an IDPS that can detect and stop malicious payloads, effectively allowing only legitimate communication(i.e. network-level vulnerabilities cannot be exploited, unsafe actions that the user may taken that would benefit the attacker are also prevented)."
+        ->  payloadInspectionBypassed
+
+      | bypassPayloadInspection [VeryHardAndUncertain]
+        user info: "Payload inspection can be bypassed."
+        ->  payloadInspectionBypassed
+
+      | payloadInspectionBypassed @hidden
+        developer info: "Payload inspection is bypassed either because it was not set, the attacker was able to circumvent it through additional effort."
+        ->  successfulAccessNetworksUninspected,
+            connectToApplicationsUninspected,
+            reverseReach
+
+      // All the hidden attack steps below are hidden because they are just used for the internal mechanics of the ConnectionRules
+      | attemptReverseReach @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  reverseReach,
+            bypassRestricted,
+            bypassPayloadInspection
+
+      & reverseReach @hidden
+        developer info: "Reverse reach is used to determine whether or not the attacker can be reached by the user. Reverse reach propagates via outgoing or bidirectional communications."
+        ->  senderApplications().attemptReverseReach,
+            (networks \/ outNetworks).attemptReverseReach
+
+      | attemptAccessNetworksUninspected @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  successfulAccessNetworksUninspected,
+            bypassRestricted,
+            bypassPayloadInspection
+
+      | attemptAccessNetworksInspected @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  successfulAccessNetworksInspected,
+            bypassRestricted
+
+      & successfulAccessNetworksUninspected @hidden
+        developer info: "Intermediate attack step to model defenses."
+        ->  accessNetworksUninspected
+
+      & successfulAccessNetworksInspected @hidden
+        developer info: "Intermediate attack step to model defenses."
+        ->  accessNetworksInspected
+
+      | accessNetworksUninspected
+        developer info: "Access all networks that are associated with this ConnectionRule, without any restriction due to inspection."
+        ->  (networks  \/ inNetworks  \/ diodeInNetworks).accessUninspected,
+            accessNetworksInspected
+
+      | accessNetworksInspected
+        developer info: "Access all networks that are associated with this ConnectionRule, but taking into account that the traffic payload is being inspected."
+        ->  (networks  \/ inNetworks  \/ diodeInNetworks).accessInspected
+
+      | attemptConnectToApplicationsUninspected @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  connectToApplicationsUninspected,
+            bypassRestricted,
+            bypassPayloadInspection
+
+      | attemptConnectToApplicationsInspected @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  connectToApplicationsInspected,
+            bypassRestricted
+
+      & connectToApplicationsUninspected @hidden
+        developer info: "Connect to all the (server) Applications that are associated with this ConnectionRule, without any restriction due to inspection."
+        ->  receiverApplications().networkConnectUninspected,
+            receiverApplications().networkConnectInspected
+
+      & connectToApplicationsInspected @hidden
+        developer info: "Connect to all the (server) Applications that are associated with this ConnectionRule, but taking into account that the traffic payload is being inspected. This attack step is used to allow legitimate traffic even when payload inspection is enabled on the connection."
+        ->  receiverApplications().networkConnectInspected
+
+      | attemptDeny @hidden
+        developer info: "Intermediate attack step to allow for defenses and trigger bypasses."
+        ->  deny,
+            bypassRestricted
+
+      & deny {A}
+        user info: "If a connection rule is denied it affects the applications communicating over it."
+        ->  allApplications().denyFromNetworkingAsset
+    }
+}
+
+associations {
+  // ### Networking associations
+  RoutingFirewall  [routingFirewalls]  0..1 <-- FirewallConnectionRule --> *    [connectionRules]       ConnectionRule
+      user info: "A routing firewall has routing or firewall rules specified by connections between networks or applications respectively."
+  RoutingFirewall  [managedRoutingFw]     * <-- ManagedBy             --> 0..1 [managerApp]             Application
+      user info: "A routing firewall can have an admin/manager interface (application) that is accessible from a network location."
+  Network          [networks]             * <-- NetworkExposure       --> *    [applications]           Application
+      user info: "An application can communicate / be exposed on a network."
+      modeler info: "This is DEPRECATED and should only be used by fully aware modelers."
+      developer info: "This can equivalently be modeled using a ConnectionRule but this direct approach should be prefered in the case where the application is “located” in the same network as the host on which it is running."
+  Application      [applications]         * <-- ApplicationConnection --> *    [appConnections]         ConnectionRule
+      user info: "An application can communicate over one or more (mesh type) bidirectional connections."
+      modeler info: "ConnectionRules associated with Applications are practically expressing a traffic flow."
+  Application      [inApplications]       * <-- InApplicationConnection --> *  [ingoingAppConnections]  ConnectionRule
+      user info: "Two or more applications can also be inter-connected via a uni-directional connection. In means that this is the server side application, awaiting incoming connections."
+  Application      [outApplications]      * <-- OutApplicationConnection --> * [outgoingAppConnections] ConnectionRule
+      user info: "Two or more applications can also be inter-connected via a uni-directional connection. Out means that this is the client side application initiating connections."
+  Network          [networks]             * <-- NetworkConnection     --> *    [netConnections]         ConnectionRule
+      user info: "Two or more networks can also be inter-connected via a bidirectional connection."
+  Network          [inNetworks]           * <-- InNetworkConnection   --> *    [ingoingNetConnections]  ConnectionRule
+      user info: "Two or more networks can also be inter-connected via a uni-directional connection. In means that ingoing traffic to the network is allowed."
+  Network          [outNetworks]          * <-- OutNetworkConnection  --> *    [outgoingNetConnections] ConnectionRule
+      user info: "Two or more networks can also be inter-connected via a uni-directional connection. Out means that outgoing traffic from the network is allowed."
+  Network          [diodeInNetworks]      * <-- DiodeInNetworkConnection --> * [diodeIngoingNetConnections] ConnectionRule
+      user info: "Two or more networks can also be inter-connected via a uni-directional connection that acts like a diode. That means that no responses can come back after connection initiation."
+}
