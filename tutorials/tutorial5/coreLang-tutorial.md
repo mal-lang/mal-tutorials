@@ -41,7 +41,7 @@ When you read a `.mal` file, start by looking for five things: how assets are gr
 
    Here the file defines one category, `ComputeResources`, and all assets in that file belong to it.
 
-2. **`asset`** defines a thing you can model, and `extends` lets it reuse behavior from a parent asset using inheritence.
+2. **`asset`** defines a thing you can model, and `extends` lets it reuse behavior from a parent asset using inheritance.
 
    From `ComputeResources.mal`:
 
@@ -49,7 +49,7 @@ When you read a `.mal` file, start by looking for five things: how assets are gr
    asset SoftwareProduct extends Information
    ```
 
-   Here `SoftwareProduct` is an asset, and `extends Information` means it inherits the behavior that `Information` already provides. In this case, `Information` is definied in the `DataResources.mal` file.
+Here `SoftwareProduct` is an asset, and `extends Information` means it inherits the behavior that `Information` already provides. In this case, `Information` is defined in the `DataResources.mal` file.
 
 3. **Attack steps** describe what an attacker can do to or through an asset.
 
@@ -67,6 +67,11 @@ When you read a `.mal` file, start by looking for five things: how assets are gr
    ```
 
    Read the symbols like this: `|` means the step can continue when one parent path succeeds, `&` means all required parent paths must succeed, `@hidden` means the step should be excluded from visualization, and `->` lists the next steps that become available. In this example, the attacker first tries to abuse the vulnerability, then exploit it, and finally reach the impact.
+
+   Concrete flow for this snippet:
+   - `attemptAbuse` succeeds, so `abuse` becomes reachable.
+   - `abuse` succeeds, so `attemptExploit` becomes reachable.
+   - `exploit` succeeds, so `impact` becomes reachable.
 
    A more concrete step from `ComputeResources.mal` looks like this:
 
@@ -202,6 +207,12 @@ pip install mal-toolbox
 pip install mal-simulator
 ```
 
+If you want to run MAL Sim GUI with Docker, start it with:
+
+```
+docker run -p 8888:8888 mrkickling/malsim-gui:0.0.0
+```
+
 Also you should download the coreLang language by cloning the repository in your working directory.
 
 ```
@@ -212,8 +223,11 @@ Alternatively you can download the files directly from the repository and place 
 
 ### 2.3 Adding the assets
 
-Create a file called `model.py` in your tutorial directory. We will now create the `create_model` helper function, that defines all our asset.
+Create a file called `model.py` in your tutorial directory. We will now create the `create_model` helper function that defines all our assets.
 Start with the imports and the function signature and creating an empty model:
+
+In this chapter we first declare all assets, then wire them with associations in §2.4.
+The `lang` object is passed into `create_model`; loading `LanguageGraph` is shown in §2.5.
 
 ```python
 from maltoolbox.language import LanguageGraph
@@ -444,7 +458,7 @@ webapp.add_associated_assets("appConnections", {cr_dmz_webapp})
 #### DMZ ↔ InternalNet
 
 This `ConnectionRule` controls traffic between the DMZ and the internal network.
-The `restricted` defense on this rule enforces a traffic boundary, generally indicating firewall rules: by default it is disabled and we will leave it like this to simulate the presence of a missconfiguration in the firewall.
+The `restricted` defense on this rule enforces a traffic boundary, generally indicating firewall rules: by default it is disabled and we will leave it like this to simulate the presence of a misconfiguration in the firewall.
 
 ```python
 dmz.add_associated_assets("netConnections",        {cr_dmz_internalnet})
@@ -529,6 +543,13 @@ def create_model(lang: LanguageGraph) -> Model:
     return model
 ```
 
+Quick check in MAL Sim GUI after running `simulation.py`:
+
+- You should now see the assets, connection rules and associations
+- Nothing is compromised as we do not have vulnerabilities nor an attacker just yet
+
+![Assets graph without vulnerabilities](./resources/images/graph_without_vulnerabilities.png)
+
 ### 2.5 Adding vulnerabilities and misconfigurations
 
 A model without flaws has no interesting attack paths.
@@ -567,7 +588,7 @@ Here a developer hard-coded the database connection string, including credential
 - **`Identity`** (`DBAdminIdentity`) is the database service account. It has high-privilege access on `Database`, meaning that whoever assumes it gets full access.
 - **`Credentials`** (`DBAdminCreds`) is the secret that authenticates as the identity above. It is hard-coded in a config file (`WebAppConfig`) on the `WebApp` server — any attacker who reads the WebApp filesystem will find it.
 
-These would be maybe a bit too convenient for an attacker to find this way, but it serves as an example. Your model could have more nuanced vulnerabilites with extra steps requred to gain such high-privileges.
+These would be maybe a bit too convenient for an attacker to find this way, but it serves as an example. Your model could have more nuanced vulnerabilities with extra steps required to gain such high privileges.
 
 ```python
 dbadmin_id    = model.add_asset("Identity",    "DBAdminIdentity")
@@ -586,8 +607,9 @@ Now that we have modelled our infrastructure, it would be good to take a look at
 
 We will be using the [MAL Sim GUI](https://github.com/mal-lang/malsim-gui) to visualize the model so far and later on to explore the attack paths.
 
-Please follow the instructictions in the repository to install the gui.
-Once everything is set up, create in the tutorial directory a `simulation.py` file, that will contain the code to load the `coreLang` language, call our `create_model` function. Generaty the attack graph and run the simulation.
+Please follow the instructions in the repository to install the GUI.
+
+Once everything is set up, create in the tutorial directory a `simulation.py` file that will contain the code to load the `coreLang` language, call our `create_model` function, generate the attack graph, and run the simulation.
 
 Once you created the file copy-paste this code:
 
@@ -703,6 +725,12 @@ if __name__ == "__main__":
 
 The entry point `Internet:accessUninspected` is the starting position for an external threat actor. The goal `CustomerData:read` is the attack step the agent will try to reach.
 
+Attacker settings used in this tutorial:
+
+- `entry_points={"Internet:accessUninspected"}`: initial attacker foothold.
+- `goals={"CustomerData:read"}`: target attack step that ends the run successfully.
+- `policy=DepthFirstAttacker`: explores one path deeply before backtracking.
+
 ### 2.7 Running the simulation with an attacker
 
 Run the simulation with:
@@ -717,8 +745,8 @@ the attacker executed at that step.
 
 We use `DepthFirstAttacker`, which follows the deepest unexplored path at
 every step. Its execution order is deterministic on CPython but reflects a
-depth-first traversal rather than the causal kill-chain order, so some AND
-nodes that are automatically triggered (e.g. `Database:networkConnect`) may
+depth-first traversal rather than the causal kill-chain order, so some conjunction
+steps that are automatically triggered (e.g. `Database:networkConnect`) may
 appear in the recording before the explicit step that caused them (e.g.
 `InternalNet:accessUninspected`). The output should look similar to this:
 
@@ -822,6 +850,18 @@ and `CustomerData:read` follow immediately.
 The GUI, once refreshed will also display each step in the `Activity Timeline` footer as the attacker
 moves through the infrastructure.
 
+To observe attack propagation in MAL Sim GUI:
+
+1. Start the GUI container and open `http://localhost:8888`.
+2. Run `python simulation.py` in the tutorial directory.
+3. Refresh the GUI page to load the latest run.
+4. Follow the `Activity Timeline` and click nodes as they activate.
+5. Verify the final step `CustomerData:read` appears.
+
+Once the full timeline is evaluated, all the nodes are compromised.
+
+![Assets graph all compromised](./resources/images/graph_all_compromised.png)
+
 ### 2.8 Stopping the attacker with defenses
 
 The model now has a working kill chain. The next step is to show that enabling specific defenses breaks it. Each defense is a coreLang probability toggle added inside `create_model` in `model.py`. Enable them one at a time, re-run, and compare the results.
@@ -848,6 +888,10 @@ Re-run with `python simulation.py`. The attacker is stopped at the DMZ boundary;
 `Database:networkConnect` never fires, the conjunction step `Database:networkAccess`
 cannot be satisfied, and `CustomerData:read` is unreachable.
 
+In the GUI, we can see that the nodes that connect the Intranet to the DB and also everything else behind it, do not get alerted.
+
+![Assets graph defense 1](./resources/images/graph_defense_1.png)
+
 #### Defense 2 — Patch the vulnerability
 
 Remove the previous defense and instead remove the exploitable flaw. In coreLang, a
@@ -864,6 +908,10 @@ Re-run with `python simulation.py`. The attacker can still cross into InternalNe
 but `WebApp:successfulUseVulnerability` can no longer fire, so neither
 `specificAccess` nor `fullAccess` is reachable from the network. The credential
 theft path collapses and `CustomerData:read` is unreachable.
+
+IN the GUI, propagation reaches but does not trigger the `CustomerData`.
+
+![Assets graph defense 2](./resources/images/graph_defense_2.png)
 
 #### Defense 3 — Remove credentials from the config file
 
@@ -883,6 +931,11 @@ fully, but `WebAppConfig:read` no longer propagates to `DBAdminCreds:read`.
 `DBAdminIdentity` cannot be assumed, `Database:authenticate` never fires, and
 `Database:networkAccess` cannot be satisfied — `CustomerData:read`
 is unreachable.
+
+In the GUI, propagation reaches WebApp compromise but stops before credential use/identity assumption.
+The `CustomerData` node is notified but no Read operation can occur.
+
+![Assets graph defense 3](./resources/images/graph_defense_3.png)
 
 #### Defense 4 — Disable the standing database admin account
 
@@ -905,3 +958,7 @@ credentials are still in the config — but `DBAdminIdentity:assume` cannot
 fire because the identity is absent. `Database:authenticate` never fires,
 `Database:networkAccess` cannot be satisfied and
 `CustomerData:read` is unreachable.
+
+In the GUI, the nodes are alerted, but the attacker still cannot read the `CustomerData`.
+
+![Assets graph defense 4](./resources/images/graph_defense_4.png)
