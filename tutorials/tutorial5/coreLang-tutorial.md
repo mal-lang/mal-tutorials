@@ -1,3 +1,13 @@
+---
+Title: CoreLang Tutorial
+Author(s): 
+  - name: Paolo Scattolin
+    github: Paul2803k
+  - name: Ivo Kroskinski
+    github: xncz8h
+Date: 10-06-2026
+---
+
 # coreLang Tutorial — Modeling a Real Infrastructure Step‑by‑Step
 
 This tutorial introduces [**coreLang**](https://github.com/mal-lang/coreLang), a [MAL](https://mal-lang.org/) (Meta Attack Language)
