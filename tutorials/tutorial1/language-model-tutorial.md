@@ -1,9 +1,9 @@
 # Tutorial 1 - Create a language and a model
-In this tutorial, you will learn how to build a simple MAL language, create a model from it and run simulations.
+In this tutorial, we will learn how to build a simple MAL language, create a model from it and run simulations.
 
 ## Step by step
 ### Environment Set-up
-Create a directory for the tutorial and set it as your working directory: `mkdir mal-tutorial1 && cd mal-tutorial1`
+Create a directory for the tutorial and set it as working directory: `mkdir mal-tutorial1 && cd mal-tutorial1`
 Create a Python virtual environment and activate it.
 - On Linux-based operating systems:
 ```
@@ -84,7 +84,7 @@ We define a category called System that holds three assets:
 - Credentials
     - If `access` is given, it would trigger `useUnencrypted` and `crack`.
         - `useUnencrypted` would trigger `use`, which then would trigger `authenticate` in the `Machine` asset. This would mean that the attack has succedeed and the attacker has access to the machine.
-    - The `crack` step has an ordinal distribution (HardAndCertain). This means that probability for this step to happen is hard and certain. HardAndCertain is defined by the distribution function Exponential(0.1). You can read more about this topic [here](https://github.com/mal-lang/malcompiler/wiki/Supported-distribution-functions).
+    - The `crack` step has an ordinal distribution (HardAndCertain). This means that probability for this step to happen is hard and certain. HardAndCertain is defined by the distribution function Exponential(0.1). More on this topic can be read [here](https://github.com/mal-lang/malcompiler/wiki/Supported-distribution-functions).
     - The `encrypted` step is a **defense step**. That is, if the defender activates it, `useEncrypted` will be blocked and, therefore, that path will be as well.
 - Network
     - If the `communicate` step is activated, `connect` of the `Machine` asset will be given. This step allows jumping from machine to machine.
@@ -164,7 +164,7 @@ Model created successfully!
 Model(name: "my-model", language: LanguageGraph(id: "exampleLang", version: "2.0.0"))
 ```
 
-You can see the final version of `tutorial1_model.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_model.py).
+The final version of `tutorial1_model.py` can be seen [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_model.py).
 
 ### Create an Attack Graph
 To create an attack graph, we use the **model** and **exampleLang**. Add this import to the top of the `tutorial1_simulation.py` file:
@@ -315,7 +315,7 @@ In this section, we define the `DefenderSettings` object:
 - `Defender1`: the name we give to the defender agent.
 - `policy`: The same policies are shared between attackers and defenders (policies can be found in [malsim.policies](https://github.com/mal-lang/mal-simulator/tree/main/malsim/policies)).
 
-Run the simulation again `python tutorial1_simulation.py` and you will see something similar to the codebox below. 
+Run the simulation again `python tutorial1_simulation.py` and we will see something similar to the codebox below. 
 
 ```bash
 Iteration 0
@@ -350,6 +350,6 @@ defaultdict(<class 'dict'>,
 
 As we can see, the defender uses the `encrypted` defense step, but the attacker still reaches its goal.
 
-You can see the final version of `tutorial1_simulation.py` [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_simulation.py).
+The final version of `tutorial1_simulation.py` can be seen [here](https://github.com/mal-lang/mal-tutorials/blob/main/tutorials/tutorial1/tutorial1_simulation.py).
 
 This tutorial has shown how to build a mal-lang, a model, an language graph, an attack graph and run a simulation. [Tutorial 2](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial2) will cover model-building from a given mal-lang, visualize an attack graph and give further insights on simulations.
