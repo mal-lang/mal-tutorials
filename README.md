@@ -1,10 +1,11 @@
 # MAL-tutorials
+
 A series of tutorials on how to use mal-toolbox and associated tools.
 Examples in this repository are written to work for mal-toolbox and mal-simulator 2.\*.\*.
 This repository contains tutorials and guides on how to do things with the toolbox and simulator, as well as other tools in the MAL ecosystem.
 
-
 ## What is MAL?
+
 A language to create cyber threat modeling systems for specific domains.
 
 Read more about MAL at: https://mal-lang.org
@@ -19,3 +20,4 @@ Tutorials are step by step instructions that you can follow along with.
 - [Tutorial 2 - Load a MAL-Language, create a model and run simulations](tutorials/tutorial2/model-tutorial.md)
 - [Tutorial 3 - Represent simple model in MAL-GUI](tutorials/tutorial3/mal-gui-tutorial.md)
 - [Tutorial 4 - Run a simulation in MAL-Sim-GUI](tutorials/tutorial4/malsim-gui-tutorial.md)
+- [Tutorial 5 - Use a MAL-Language to model a real infrastructure](tutorials/tutorial5/coreLang-tutorial.md)
