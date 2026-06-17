@@ -1,10 +1,8 @@
-# Tutorial 3 - How to use the MAL GUI
-The [mal-gui](https://github.com/mal-lang/mal-gui) is a graphical user interface tool used to create MAL instance models and scenarios (specifying attack agents). In this tutorial we will learn how to use it.
+# Tutorial 3 - How to use the mal-gui
+The [mal-gui](https://github.com/mal-lang/mal-gui) is a graphical user interface tool used to create MAL instance models and scenarios. In this tutorial we will learn how to use it.
 
 ## Installation
 1. In your working directory, create a virtual environment and activate it.
-> [!NOTE]
-> Currently, mal-gui uses version 1.x of NumPy, therefore, Python <= 3.12 is needed.
 - On Linux-based operating systems:
 ```
 python -m venv venv
@@ -19,11 +17,11 @@ python -m venv venv
 4. Run the following command to open the app: `malgui`
 
 ## Loading a language and creating the model
-When we first run the GUI, we get the following Window:
+When we first run the mal-gui, we get the following window:
 
 ![alt text](image.png)
 
-If you don't know how to create a MAL language, you can follow this [tutorial](https://github.com/mal-lang/mal-toolbox-tutorial/tree/main/tutorials/language-model-tutorial).
+If you don't know how to create a MAL language, you can follow [Tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1).
 
 For the sake of completeness, we will download and use the same simple MAL language used in that tutorial (`my-language.mal`). We will build the same model as well.
 
@@ -34,6 +32,6 @@ Then, we can **create associations** between assets. To do so, press SHIFT while
 ![alt text](image-1.png)
 
 ## Define a scenario
-To define a scenario, we set an entry point for the attacker. We will choose the entry point used in the [tutorial](https://github.com/mal-lang/mal-toolbox-tutorial/tree/main/tutorials/language-model-tutorial) we have been using. To do so, drag and drop the `Attacker` asset from the left menu and create an association with `ComputerA` and choose `access`.
+To define a scenario, we set an entry point for the attacker. To do so, drag and drop the `Attacker` asset from the left menu and create an association with `ComputerA` and choose `access`.
 
 ![alt text](image-2.png)
