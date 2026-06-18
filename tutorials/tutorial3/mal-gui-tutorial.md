@@ -23,7 +23,7 @@ When we first run the mal-gui, we get the following window:
 
 If you don't know how to create a MAL language, you can follow [Tutorial 1](https://github.com/mal-lang/mal-tutorials/tree/main/tutorials/tutorial1).
 
-For the sake of completeness, we will download and use the same simple MAL language used in that tutorial (`my-language.mal`). We will build the same model as well.
+For the sake of completeness, we will download and load the same mal-lang used in said tutorial: [exampleLang](https://github.com/mal-lang/exampleLang). We will build the same model as well. If the language has more than one `.mal` file, we will load the main file, usually called `main.mal`. An example of this would be [tyrLang](https://github.com/mal-lang/tyrLang/tree/main).
 
 The next step is to **add assets**. To do so, we can drag and drop new assets from the object explorer on the left. In this case, they are `Computer` and `Folder`. You can change the name of the assets by double-clicking on each of the individual boxes.
 
