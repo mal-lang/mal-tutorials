@@ -49,7 +49,9 @@ As we can see, it uses the `Communication`, `Storage`, and `Access`. If we wante
 
 You can also delete connections by right-clicking on them and choosing `Delete Connection`.
 
-## Define a scenario
-To define a scenario, we set an entry point for the attacker. To do so, drag and drop the `Attacker` asset from the left menu and create an association with `ComputerA` and choose `access`.
+## Define a scenario with an attack agent
+To define a scenario, we set an entry point for the attacker. To do so, drag and drop the `Attacker` asset from the left menu. To create the same scenario we have in tutorial 1's simulation, create an association with `Machine1` and choose `compromise`.
 
 ![alt text](image-3.png)
+
+mal-gui does not allow to run simulations as it is meant for model and scenario creation and visualization.
