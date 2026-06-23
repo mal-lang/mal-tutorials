@@ -50,7 +50,7 @@ As we can see, it uses the `Communication`, `Storage`, and `Access`. If we wante
 You can also delete connections by right-clicking on them and choosing `Delete Connection`.
 
 ## Define a scenario with an attack agent
-To define a scenario, we set an entry point for the attacker. To do so, drag and drop the `Attacker` asset from the left menu. To create the same scenario we have in tutorial 1's simulation, create an association with `Machine1` and choose `compromise`.
+To define a scenario, we set an **entry point for the attacker**. As in mal-simulator, entry points are associated to a specific instance of an asset and an attack step. To do so, drag and drop the `Attacker` asset from the left menu. To create the same scenario we have in tutorial 1's simulation, create an association with `Machine1` and choose `compromise`.
 
 ![alt text](image-3.png)
 
