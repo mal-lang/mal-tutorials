@@ -55,3 +55,84 @@ To define a scenario, we set an **entry point for the attacker**. As in mal-simu
 ![alt text](image-3.png)
 
 mal-gui does not allow to run simulations as it is meant for model and scenario creation and visualization.
+
+## Export files
+mal-gui allows exporting the models and scenarios we create. If we click on `File` we get the following options:
+- *Export Model*: a Save window will be prompted. When the name of the file is chosen, we need to add the extension as well. Choose between .yml, .yaml, or .json.
+- *Export Scenario*: same situation as in Export Model.
+- *Export draw.io file*: a Save As window will be prompted. In this case, the file extension is already added, so we only need to choose the file name.
+
+## Load a model/scenario directly
+mal-gui also allows loading our own model/scenario .yml files. The only difference between model and scenario files is that the scenario file also includes information about the agents and the simulation. For this example, we have the `example-scenario.yml` file in this repository. It follows the exact same model and agent configuration as tutorial 1.
+
+```yml
+lang_file: git@github.com:mal-lang/exampleLang.git
+agents:
+  Attacker:
+    type: attacker
+    entry_points:
+      - "Machine1:compromise"
+    agent_class: TTCSoftMinAttacker
+    goals:
+      - "Machine2:compromise"
+
+model:
+  metadata:
+    name: New Model
+    langVersion: 0.0.0
+    langID: exampleLang
+    malVersion: 0.1.0-SNAPSHOT
+    MAL-Toolbox Version: 3.0.0
+    info: Created by the mal-toolbox model python module.
+  assets:
+    0:
+      name: Machine1
+      type: Machine
+      associated_assets:
+        networks:
+          2: OfficeNet
+        storesCreds:
+          1: CredentialsForM2
+      extras:
+        position:
+          x: -506.0
+          y: -423.0
+    1:
+      name: CredentialsForM2
+      type: Credentials
+      associated_assets:
+        storedOn:
+          0: Machine1
+        authenticates:
+          3: Machine2
+      extras:
+        position:
+          x: -880.0
+          y: -552.0
+    2:
+      name: OfficeNet
+      type: Network
+      associated_assets:
+        parties:
+          0: Machine1
+          3: Machine2
+      extras:
+        position:
+          x: -75.0
+          y: -535.0
+    3:
+      name: Machine2
+      type: Machine
+      associated_assets:
+        networks:
+          2: OfficeNet
+        authCreds:
+          1: CredentialsForM2
+      extras:
+        position:
+          x: -495.0
+          y: -672.0
+```
+
+To load the file, press `File` -> `Load Model/Scenario` and select the correct .yml file. We would see the following scenario:
+![alt text](image-4.png)
