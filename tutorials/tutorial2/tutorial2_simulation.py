@@ -8,10 +8,15 @@ from malsim.config import AttackerSettings, MalSimulatorSettings, TTCMode
 from malsim.policies import RandomAgent
 
 def main():
-    lang_file = "/Users/navas/sweden/amanuensis/tyrLang/src/main/mal/main.mal"
+    # Assuming tyrlang has been cloned locally
+    lang_file = "/path/to/tyrLang/main.mal"
     current_dir = os.path.dirname(os.path.abspath(__file__))
     lang_file_path = os.path.join(current_dir, lang_file)
     tyr_lang = LanguageGraph.load_from_file(lang_file_path)
+
+    # Assuming tyrLang is to be cloned automatically
+    # lang_file = "git@github.com:mal-lang/tyrLang.git"
+    # tyr_lang = LanguageGraph.load_from_file(lang_file)
 
     model = create_model(tyr_lang)
     attack_graph = AttackGraph(tyr_lang, model)
