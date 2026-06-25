@@ -7,10 +7,6 @@ Create a directory for the tutorial:
 
 `mkdir mal-tutorial2 && cd mal-tutorial2`
 
-We will use **tyrLang** as the mal-lang. Download it from Github and put tyrLang in the working directory:
-
-`git clone https://github.com/mal-lang/tyrLang.git`
-
 Create a Python virtual environment and activate it.
 - On Linux-based operating systems:
 ```
@@ -29,7 +25,7 @@ pip install mal-simulator
 ```
 
 ### mal-lang: tyrLang
-[tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), which is very general and large language intended for common use cases within the IT domain. tyrLang is a simpler version of coreLang. For this tutorial, we will use certain parts of tyrLang.
+In this tutorial we will use **tyrLang** as the mal-lang. [tyrLang](https://github.com/mal-lang/tyrLang) is a mal-lang created by MAL developers. It is derived from another mal-lang called [coreLang](https://github.com/mal-lang/coreLang), which is very general and large language intended for common use cases within the IT domain. tyrLang is a simpler version of coreLang.
 
 - `Network`, `InternetworkConnectionRule` and `ConnectionRule` assets, and `interNetConnections`, `appConnections` and `netConnections` association: can be found in tyrLang's `src/main/mal/Networking.mal` file.
 - `Application` asset in `src/main/mal/DataResources.mal` file.
@@ -158,7 +154,14 @@ In this simple function, we create:
 - Add a user (`UserOnApp3`) to `App3` using our `add_user_to_app` helper function, which uses an `Identity` asset and an `execPrivApps` association.
 - Add credentials (`User3Creds`) to `UserOnApp3` using our `add_creds_to_user` helper function, which uses an `Credentials` asset and an `identities` association.
 
-To instantiate the model, we will create another file called `tutorial2_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it. Add this to the `tutorial2_simulation.py` file:
+To instantiate the model, we will create another file called `tutorial2_simulation.py`. This model will work as our main file and we will later learn about mal-simulator in it.
+
+Now we need to load the mal-lang itself. To use a pre-existing mal-lang we have these options (assuming the language is in a GitHub repository):
+- Option 1: Download it locally and save it in the directory of your choosing: `git clone https://github.com/mal-lang/tyrLang.git`
+Once that is done, we set the main `.mal` file as the language file: `lang_file = "/path/to/tyrLang/main.mal"`. If the language has more than one `.mal` file, we will load the main file, usually called `main.mal`.
+- Option 2: Set the repository's SSH URL as the language. For this option, you will need to set up SSH keys. You can read more about this [here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh). This approach will clone the repository automatically to `./.langs`.
+
+Add this to the `tutorial2_simulation.py` file if you want to follow Option 1:
 
 ```python
 import os
@@ -170,6 +173,23 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     lang_file_path = os.path.join(current_dir, lang_file)
     tyr_lang = LanguageGraph.load_from_file(lang_file_path)
+
+    model = create_model(tyr_lang)
+
+if __name__ == "__main__":
+    main()
+```
+
+If you would like to follow Option 2, add this instead:
+
+```python
+import os
+from maltoolbox.language import LanguageGraph
+from tutorial2_model import create_model
+
+def main():
+    lang_file = "git@github.com:mal-lang/tyrLang.git"
+    tyr_lang = LanguageGraph.load_from_file(lang_file)
 
     model = create_model(tyr_lang)
 
