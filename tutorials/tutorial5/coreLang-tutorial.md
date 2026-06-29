@@ -20,7 +20,7 @@ the language works, you will incrementally build a realistic model of an infrast
 
 coreLang is a MAL language that captures the abstract IT domain: applications, hardware, networks, data, identities, credentials, vulnerabilities, etc. It is general enough to describe most modern IT infrastructures (cloud, on‑prem, hybrid, microservices, IoT) at a meaningful abstraction.
 
-The language is split across several `.mal` files that can be found in the [coreLang repository](https://github.com/mal-lang/coreLang/tree/master/src/main/mal)
+The language is split across several `.mal` files that can be found in the [coreLang repository](https://github.com/mal-lang/coreLang/tree/master/src/main/mal).
 
 The current (`1.0.0`) version includes the following files:
 
@@ -59,7 +59,7 @@ When you read a `.mal` file, start by looking for five things: how assets are gr
    asset SoftwareProduct extends Information
    ```
 
-Here `SoftwareProduct` is an asset, and `extends Information` means it inherits the behavior that `Information` already provides. In this case, `Information` is defined in the `DataResources.mal` file.
+    Here `SoftwareProduct` is an asset, and `extends Information` means it inherits the behavior that `Information` already provides. In this case, `Information` is defined in the `DataResources.mal` file.
 
 3. **Attack steps** describe what an attacker can do to or through an asset.
 
